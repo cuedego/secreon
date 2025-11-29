@@ -21,7 +21,7 @@
 
 ### File Formats
 
-#### Shares JSON Structure
+#### Combined Shares JSON Structure (Legacy/Default)
 
 ```json
 {
@@ -42,6 +42,37 @@
   ]
 }
 ```
+
+#### Individual Share JSON Structure (Split Shares)
+
+When using `--split-shares`, each share is written to a separate file:
+
+```json
+{
+  "meta": {
+    "minimum": 3,
+    "shares": 5,
+    "share_index": 1,
+    "prime": 170141183460469231731687303715884105727,
+    "secret_byte_length": 146,
+    "kdf": {
+      "kdf": "pbkdf2",
+      "iterations": 100000,
+      "salt": "base64encodedstring"
+    }
+  },
+  "share": {
+    "x": 1,
+    "y": 12345...
+  }
+}
+```
+
+**Benefits of Split Shares:**
+- Eliminates risk of data corruption during manual file splitting
+- Each file is self-contained with complete metadata
+- Safer for distribution - no accidental exposure of multiple shares
+- Simplifies share management and tracking
 
 #### Configuration (config/default.json)
 
@@ -91,10 +122,11 @@ python3 src/sss.py generate [OPTIONS]
 - `--secret-file, -f`: Path to file containing secret
 - `--minimum, -m`: Threshold (default: 3)
 - `--shares, -n`: Number of shares (default: 5)
-- `--out, -o`: Output file for shares JSON
+- `--out, -o`: Output file for shares JSON (or base name for split shares)
 - `--format`: json|lines (default: json)
 - `--kdf`: sha256 or pbkdf2:ITERATIONS
 - `--prime`: Custom prime modulus
+- `--split-shares`: Generate individual files for each share
 
 #### Recover Command
 ```bash
@@ -102,11 +134,17 @@ python3 src/sss.py recover [OPTIONS]
 ```
 
 **Options:**
-- `--shares-file, -i`: Path to shares JSON file
+- `--shares-file, -i`: Path(s) to shares JSON file(s), can specify multiple
+- `--shares-dir, -d`: Directory containing share files
 - `--format`: json|lines (default: json)
 - `--as-str`: Decode recovered secret as UTF-8 string
 - `--out, -o`: Output file
 - `--prime`: Override prime from metadata
+
+**Recovery Methods:**
+1. Single file: `--shares-file shares.json`
+2. Multiple files: `--shares-file share-1.json share-2.json share-3.json`
+3. Directory: `--shares-dir /path/to/shares/`
 
 ## Mathematical Background
 
@@ -123,13 +161,28 @@ Shamir's Secret Sharing is based on polynomial interpolation over finite fields:
 ### For BIP39 Seeds (24 words)
 ```bash
 # Use default prime (2^2203-1) - automatically handles BIP39 seeds
-python3 src/sss.py generate --secret-file seed.txt --minimum 3 --shares 5 --out shares.json
+# Use split shares for safer distribution
+python3 src/sss.py generate --secret-file seed.txt --minimum 3 --shares 5 \
+  --out share.json --split-shares
 ```
 
 ### For Passphrases
 ```bash
 # Always use PBKDF2 with high iteration count
-python3 src/sss.py generate --secret "my passphrase" --kdf pbkdf2:200000 --out shares.json
+python3 src/sss.py generate --secret "my passphrase" --kdf pbkdf2:200000 \
+  --out shares.json
+```
+
+### For Critical Data Distribution
+```bash
+# Split shares eliminate manual file editing risks
+python3 src/sss.py generate --secret-file critical.key --minimum 4 --shares 7 \
+  --out share.json --split-shares
+
+# Distribute individual files to different secure locations
+# Recovery from any 4 files:
+python3 src/sss.py recover --shares-file share-1.json share-3.json \
+  share-5.json share-7.json --as-str
 ```
 
 ### For Files
@@ -145,7 +198,7 @@ Run the test suite:
 python3 tests/test_sss.py
 ```
 
-All 11 tests should pass.
+All 17 tests should pass, including split shares functionality tests.
 
 ## Troubleshooting
 

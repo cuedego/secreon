@@ -46,6 +46,10 @@ python3 secreon.py generate --secret 'my passphrase' --kdf pbkdf2:200000 --out s
 
 # Generate shares using SHA-256 (fast but less secure for passphrases)
 python3 secreon.py generate --secret 'my passphrase' --kdf sha256 --out shares.json
+
+# Generate individual share files (safer for distribution)
+python3 secreon.py generate --secret 'my secret' --out share.json --split-shares
+# This creates: share-1.json, share-2.json, share-3.json, etc.
 ```
 
 ### Recover secret from shares
@@ -62,6 +66,12 @@ cat shares.json | python3 secreon.py recover
 
 # Write recovered secret to file
 python3 secreon.py recover --shares-file shares.json --as-str --out recovered.txt
+
+# Recover from multiple individual share files
+python3 secreon.py recover --shares-file share-1.json share-3.json share-5.json --as-str
+
+# Recover from a directory containing share files
+python3 secreon.py recover --shares-dir /path/to/shares/ --as-str
 ```
 
 ## Configuration
@@ -83,6 +93,7 @@ Default parameters can be set in `config/default.json` (optional):
 - **Passphrases**: If using passphrases, always use `--kdf pbkdf2:N` (N >= 100000 iterations) to slow down brute-force attacks. SHA-256 does not protect weak passphrases.
 - **Random secrets**: For high-security applications, use a cryptographically random secret rather than a passphrase.
 - **Share storage**: Protect share files with appropriate file permissions. Consider distributing shares to different locations.
+- **Split shares**: Use `--split-shares` to generate individual files for each share. This eliminates the risk of data corruption during manual file splitting and makes distribution safer.
 - **Threshold**: Choose a threshold that balances security (higher threshold = more shares needed) and fault tolerance (lower threshold = more resilient to share loss).
 
 ## Examples
@@ -116,6 +127,23 @@ python3 secreon.py generate --secret 'MyStrongPassphrase123!' --kdf pbkdf2:20000
 # The salt and iterations are stored in shares.json metadata
 # Recovery works the same way
 python3 secreon.py recover --shares-file shares.json --as-str
+```
+
+### Example 4: Split shares for safe distribution
+
+```bash
+# Generate individual share files
+python3 secreon.py generate --secret "Critical data" --minimum 3 --shares 5 --out myshare.json --split-shares
+# Creates: myshare-1.json, myshare-2.json, myshare-3.json, myshare-4.json, myshare-5.json
+
+# Distribute shares to different locations
+# Each file is self-contained with all necessary metadata
+
+# Later, recover from any 3 shares
+python3 secreon.py recover --shares-file myshare-1.json myshare-2.json myshare-5.json --as-str
+
+# Or recover from a directory
+python3 secreon.py recover --shares-dir ./shares/ --as-str
 ```
 
 ## How It Works
