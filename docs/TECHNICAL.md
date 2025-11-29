@@ -1,4 +1,4 @@
-# Vaultix Documentation
+# Secreon Documentation
 
 ## Architecture
 

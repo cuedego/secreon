@@ -1,10 +1,10 @@
-# Vaultix
+# Secreon
 
 Fault-tolerant secret storage using Shamir's Secret Sharing.
 
 ## Overview
 
-Vaultix implements Shamir's Secret Sharing scheme, allowing you to split a secret into multiple shares where any threshold number of shares can reconstruct the original secret. This provides fault tolerance and security for sensitive data.
+Secreon implements Shamir's Secret Sharing scheme, allowing you to split a secret into multiple shares where any threshold number of shares can reconstruct the original secret. This provides fault tolerance and security for sensitive data.
 
 ## Features
 
@@ -20,9 +20,9 @@ Vaultix implements Shamir's Secret Sharing scheme, allowing you to split a secre
 No dependencies required beyond Python 3.6+. Clone and run:
 
 ```bash
-git clone https://github.com/cuedego/vaultix.git
-cd vaultix
-python3 vaultix.py --help
+git clone https://github.com/cuedego/secreon.git
+cd secreon
+python3 secreon.py --help
 ```
 
 Or use directly:
@@ -36,32 +36,32 @@ python3 src/sss.py --help
 
 ```bash
 # Generate 5 shares with threshold of 3 from a string secret
-python3 vaultix.py generate --secret 'my secret message' --minimum 3 --shares 5 --out shares.json
+python3 secreon.py generate --secret 'my secret message' --minimum 3 --shares 5 --out shares.json
 
 # Generate shares from a file (BIP39 seed, keys, etc.)
-python3 vaultix.py generate --secret-file seed.txt --out shares.json
+python3 secreon.py generate --secret-file seed.txt --out shares.json
 
 # Generate shares using PBKDF2 for passphrase (recommended for passphrases)
-python3 vaultix.py generate --secret 'my passphrase' --kdf pbkdf2:200000 --out shares.json
+python3 secreon.py generate --secret 'my passphrase' --kdf pbkdf2:200000 --out shares.json
 
 # Generate shares using SHA-256 (fast but less secure for passphrases)
-python3 vaultix.py generate --secret 'my passphrase' --kdf sha256 --out shares.json
+python3 secreon.py generate --secret 'my passphrase' --kdf sha256 --out shares.json
 ```
 
 ### Recover secret from shares
 
 ```bash
 # Recover secret from JSON file (outputs integer by default)
-python3 vaultix.py recover --shares-file shares.json
+python3 secreon.py recover --shares-file shares.json
 
 # Attempt to decode recovered secret as UTF-8 string
-python3 vaultix.py recover --shares-file shares.json --as-str
+python3 secreon.py recover --shares-file shares.json --as-str
 
 # Recover from stdin
-cat shares.json | python3 vaultix.py recover
+cat shares.json | python3 secreon.py recover
 
 # Write recovered secret to file
-python3 vaultix.py recover --shares-file shares.json --as-str --out recovered.txt
+python3 secreon.py recover --shares-file shares.json --as-str --out recovered.txt
 ```
 
 ## Configuration
@@ -91,31 +91,31 @@ Default parameters can be set in `config/default.json` (optional):
 
 ```bash
 # Generate shares
-python3 vaultix.py generate --secret "The treasure is buried under the old oak tree" --out shares.json
+python3 secreon.py generate --secret "The treasure is buried under the old oak tree" --out shares.json
 
 # Recover (any 3 of 5 shares by default)
-python3 vaultix.py recover --shares-file shares.json --as-str
+python3 secreon.py recover --shares-file shares.json --as-str
 ```
 
 ### Example 2: Protect a BIP39 seed phrase
 
 ```bash
 # Create shares from a seed file
-python3 vaultix.py generate --secret-file examples/sample-seed.txt --minimum 5 --shares 10 --out seed-shares.json
+python3 secreon.py generate --secret-file examples/sample-seed.txt --minimum 5 --shares 10 --out seed-shares.json
 
 # Later, recover the seed
-python3 vaultix.py recover --shares-file seed-shares.json --as-str
+python3 secreon.py recover --shares-file seed-shares.json --as-str
 ```
 
 ### Example 3: Use PBKDF2 for passphrase-based secrets
 
 ```bash
 # Generate with strong KDF
-python3 vaultix.py generate --secret 'MyStrongPassphrase123!' --kdf pbkdf2:200000 --out shares.json
+python3 secreon.py generate --secret 'MyStrongPassphrase123!' --kdf pbkdf2:200000 --out shares.json
 
 # The salt and iterations are stored in shares.json metadata
 # Recovery works the same way
-python3 vaultix.py recover --shares-file shares.json --as-str
+python3 secreon.py recover --shares-file shares.json --as-str
 ```
 
 ## How It Works

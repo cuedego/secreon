@@ -1,6 +1,6 @@
 # Configuration
 
-This directory contains configuration files for Vaultix.
+This directory contains configuration files for Secreon.
 
 ## Files
 
@@ -31,5 +31,5 @@ Configuration files are for non-sensitive parameters only.
 You can create custom config files and specify them with:
 
 ```bash
-python3 vaultix.py generate --config config/custom.json --secret "test"
+python3 secreon.py generate --config config/custom.json --secret "test"
 ```

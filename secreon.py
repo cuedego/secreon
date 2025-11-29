@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Vaultix - Shamir's Secret Sharing for secure secret management
+Secreon - Shamir's Secret Sharing for secure secret management
 
 Usage:
-    vaultix generate --secret "my secret" --out shares.json
-    vaultix recover --shares-file shares.json --as-str
+    secreon generate --secret "my secret" --out shares.json
+    secreon recover --shares-file shares.json --as-str
 """
 
 import sys

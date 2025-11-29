@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains example seed phrases and demo files for testing Vaultix.
+This directory contains example seed phrases and demo files for testing Secreon.
 
 ## Files
 
