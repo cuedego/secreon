@@ -71,6 +71,7 @@ When using `--split-shares`, each share is written to a separate file:
 ```
 
 **Benefits of Split Shares:**
+
 - Eliminates risk of data corruption during manual file splitting
 - Each file is self-contained with complete metadata
 - Safer for distribution - no accidental exposure of multiple shares
@@ -94,7 +95,6 @@ JSON Schemas for these formats are provided in `docs/share_schema.json`.
 ## API Reference
 
 ### Core Functions
-
 
 #### `make_random_shares(secret, minimum, shares, prime=_PRIME)`
 
@@ -121,7 +121,6 @@ Recovers the secret from share points using Lagrange interpolation.
 **Returns:** Recovered secret integer
 
 ### CLI Commands
-
 
 #### Generate Command
 
