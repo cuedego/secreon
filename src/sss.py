@@ -139,7 +139,7 @@ def _deserialize_shares_json(s: str):
     if 'share' in obj:
         share = obj['share']
         if 'x' not in share or 'y' not in share:
-            raise ValueError('invalid share entry, expected {"x":.."y":..}')
+            raise ValueError('invalid share entry, expected {"x":...,"y":...}')
         shares = [(int(share['x']), int(share['y']))]
         return shares, meta
     
@@ -150,7 +150,7 @@ def _deserialize_shares_json(s: str):
     shares = []
     for item in raw:
         if 'x' not in item or 'y' not in item:
-            raise ValueError('invalid share entry, expected {"x":.."y":..}')
+            raise ValueError('invalid share entry, expected {"x":..,"y":..}')
         shares.append((int(item['x']), int(item['y'])))
     return shares, meta
 
@@ -296,6 +296,8 @@ def cmd_generate(argv: List[str]) -> int:
             if args.out:
                 full_prefix = os.path.join(out_dir, base_name)
                 print(f"Generated {len(shares)} share files: {full_prefix}-1.json to {full_prefix}-{len(shares)}.json", file=sys.stderr)
+            else:
+                print(f"Generated {len(shares)} share files in current directory: {base_name}-1.json to {base_name}-{len(shares)}.json", file=sys.stderr)
         else:
             # Original behavior: single file with all shares
             text = _serialize_shares_json(shares, meta)
@@ -309,7 +311,7 @@ def cmd_generate(argv: List[str]) -> int:
 
 def cmd_recover(argv: List[str]) -> int:
     parser = argparse.ArgumentParser(prog='recover', description='Recover secret from shares')
-    parser.add_argument('--shares-file', '-i', help='path to shares JSON file(s), can specify multiple', nargs='*', default=None)
+    parser.add_argument('--shares-file', '-i', help='path to shares JSON file(s), can specify multiple', nargs='+', default=None)
     parser.add_argument('--shares-dir', '-d', help='directory containing share files', default=None)
     parser.add_argument('--format', choices=['json', 'lines'], default='json')
     parser.add_argument('--as-str', action='store_true', help='Attempt to decode the recovered secret as UTF-8')
