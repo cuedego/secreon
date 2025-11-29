@@ -294,7 +294,8 @@ def cmd_generate(argv: List[str]) -> int:
                     f.write(share_json)
             
             if args.out:
-                print(f"Generated {len(shares)} share files: {base_name}-1.json to {base_name}-{len(shares)}.json", file=sys.stderr)
+                full_prefix = os.path.join(out_dir, base_name)
+                print(f"Generated {len(shares)} share files: {full_prefix}-1.json to {full_prefix}-{len(shares)}.json", file=sys.stderr)
         else:
             # Original behavior: single file with all shares
             text = _serialize_shares_json(shares, meta)
