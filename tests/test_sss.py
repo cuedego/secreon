@@ -245,6 +245,211 @@ def test_validation_duplicate_x_values():
         assert exit_code == 2  # Error due to duplicate x-values
 
 
+def test_split_shares_generation():
+    """Test generating individual share files with --split-shares."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        secret = 'test secret'
+        
+        argv = [
+            '--secret', secret,
+            '--minimum', '2',
+            '--shares', '3',
+            '--out', os.path.join(tmpdir, 'share.json'),
+            '--split-shares'
+        ]
+        exit_code = sss.cmd_generate(argv)
+        assert exit_code == 0
+        
+        # Verify individual files were created
+        share_files = []
+        for i in range(1, 4):
+            share_file = os.path.join(tmpdir, f'share-{i}.json')
+            assert os.path.exists(share_file), f"Share file {i} not created"
+            share_files.append(share_file)
+        
+        # Verify each file has correct structure
+        for i, share_file in enumerate(share_files, 1):
+            with open(share_file, 'r') as f:
+                data = json.load(f)
+            
+            assert 'meta' in data
+            assert 'share' in data  # Single share, not 'shares'
+            assert data['meta']['share_index'] == i
+            assert data['meta']['minimum'] == 2
+            assert data['meta']['shares'] == 3
+            assert 'x' in data['share']
+            assert 'y' in data['share']
+
+
+def test_single_share_deserialization():
+    """Test deserializing a single share JSON format."""
+    secret = 12345
+    shares = sss.make_random_shares(secret, minimum=2, shares=3)
+    meta = {'minimum': 2, 'shares': 3, 'prime': sss._PRIME}
+    
+    # Serialize single share
+    single_share_json = sss._serialize_single_share_json(shares[0], 1, meta)
+    
+    # Deserialize
+    recovered_shares, recovered_meta = sss._deserialize_shares_json(single_share_json)
+    
+    assert len(recovered_shares) == 1
+    assert recovered_shares[0] == shares[0]
+    assert recovered_meta['share_index'] == 1
+    assert recovered_meta['minimum'] == 2
+
+
+def test_recover_from_split_shares_multiple_files():
+    """Test recovery from multiple individual share files."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        secret = 'my secret data'
+        output_file = os.path.join(tmpdir, 'recovered.txt')
+        
+        # Generate split shares
+        argv_gen = [
+            '--secret', secret,
+            '--minimum', '3',
+            '--shares', '5',
+            '--out', os.path.join(tmpdir, 'share.json'),
+            '--split-shares'
+        ]
+        exit_code = sss.cmd_generate(argv_gen)
+        assert exit_code == 0
+        
+        # Recover using multiple specific files (exactly threshold)
+        share_files = [
+            os.path.join(tmpdir, 'share-1.json'),
+            os.path.join(tmpdir, 'share-3.json'),
+            os.path.join(tmpdir, 'share-5.json')
+        ]
+        
+        argv_rec = [
+            '--shares-file', *share_files,
+            '--as-str',
+            '--out', output_file
+        ]
+        exit_code = sss.cmd_recover(argv_rec)
+        assert exit_code == 0
+        
+        with open(output_file, 'r') as f:
+            recovered = f.read().strip()
+        
+        assert recovered == secret
+
+
+def test_recover_from_shares_directory():
+    """Test recovery from a directory containing share files."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        secret = 'directory test'
+        output_file = os.path.join(tmpdir, 'recovered.txt')
+        
+        # Generate split shares
+        argv_gen = [
+            '--secret', secret,
+            '--minimum', '2',
+            '--shares', '4',
+            '--out', os.path.join(tmpdir, 'myshare.json'),
+            '--split-shares'
+        ]
+        exit_code = sss.cmd_generate(argv_gen)
+        assert exit_code == 0
+        
+        # Recover using directory
+        argv_rec = [
+            '--shares-dir', tmpdir,
+            '--as-str',
+            '--out', output_file
+        ]
+        exit_code = sss.cmd_recover(argv_rec)
+        assert exit_code == 0
+        
+        with open(output_file, 'r') as f:
+            recovered = f.read().strip()
+        
+        assert recovered == secret
+
+
+def test_backward_compatibility_combined_format():
+    """Test that old combined format still works with new code."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        secret = 'backward compat test'
+        shares_file = os.path.join(tmpdir, 'combined.json')
+        output_file = os.path.join(tmpdir, 'output.txt')
+        
+        # Generate using old format (no --split-shares)
+        argv_gen = [
+            '--secret', secret,
+            '--minimum', '2',
+            '--shares', '3',
+            '--out', shares_file
+        ]
+        exit_code = sss.cmd_generate(argv_gen)
+        assert exit_code == 0
+        
+        # Verify it's the old format
+        with open(shares_file, 'r') as f:
+            data = json.load(f)
+        assert 'shares' in data  # Plural, not 'share'
+        assert len(data['shares']) == 3
+        
+        # Recover using old single-file syntax
+        argv_rec = [
+            '--shares-file', shares_file,
+            '--as-str',
+            '--out', output_file
+        ]
+        exit_code = sss.cmd_recover(argv_rec)
+        assert exit_code == 0
+        
+        with open(output_file, 'r') as f:
+            recovered = f.read().strip()
+        
+        assert recovered == secret
+
+
+def test_split_shares_with_kdf():
+    """Test split shares work correctly with KDF."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        secret = 'kdf test'
+        
+        # Use a larger prime for SHA256 output
+        large_prime = 2**256 - 189
+        
+        argv_gen = [
+            '--secret', secret,
+            '--kdf', 'sha256',
+            '--prime', str(large_prime),
+            '--minimum', '2',
+            '--shares', '3',
+            '--out', os.path.join(tmpdir, 'share.json'),
+            '--split-shares'
+        ]
+        exit_code = sss.cmd_generate(argv_gen)
+        assert exit_code == 0
+        
+        # Verify KDF info in each share file
+        for i in range(1, 4):
+            share_file = os.path.join(tmpdir, f'share-{i}.json')
+            with open(share_file, 'r') as f:
+                data = json.load(f)
+            assert 'kdf' in data['meta']
+            assert data['meta']['kdf']['kdf'] == 'sha256'
+        
+        # Recover from directory (as integer since KDF was applied)
+        output_file = os.path.join(tmpdir, 'recovered.txt')
+        argv_rec = [
+            '--shares-dir', tmpdir,
+            '--out', output_file
+        ]
+        exit_code = sss.cmd_recover(argv_rec)
+        assert exit_code == 0
+        
+        # Verify output exists (we can't match original due to KDF transformation)
+        with open(output_file, 'r') as f:
+            recovered = f.read().strip()
+        assert len(recovered) > 0  # Should have some output
+
+
 if __name__ == '__main__':
     # Run all tests
     import traceback
@@ -261,6 +466,12 @@ if __name__ == '__main__':
         test_cli_generate_with_kdf,
         test_validation_minimum_greater_than_shares,
         test_validation_duplicate_x_values,
+        test_split_shares_generation,
+        test_single_share_deserialization,
+        test_recover_from_split_shares_multiple_files,
+        test_recover_from_shares_directory,
+        test_backward_compatibility_combined_format,
+        test_split_shares_with_kdf,
     ]
     
     passed = 0

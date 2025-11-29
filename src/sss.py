@@ -121,16 +121,36 @@ def _serialize_shares_json(shares: List[tuple], meta: Dict[str, Any]) -> str:
     return json.dumps(data, indent=2)
 
 
+def _serialize_single_share_json(share: tuple, share_index: int, meta: Dict[str, Any]) -> str:
+    """Serialize a single share with metadata for individual file output."""
+    x, y = share
+    data = {
+        'meta': dict(meta, share_index=share_index),
+        'share': {'x': int(x), 'y': int(y)}
+    }
+    return json.dumps(data, indent=2)
+
+
 def _deserialize_shares_json(s: str):
     obj = json.loads(s)
     meta = obj.get('meta', {})
+    
+    # Check if it's a single share format
+    if 'share' in obj:
+        share = obj['share']
+        if 'x' not in share or 'y' not in share:
+            raise ValueError('invalid share entry, expected {"x":.."y":..}')
+        shares = [(int(share['x']), int(share['y']))]
+        return shares, meta
+    
+    # Legacy format with multiple shares
     raw = obj.get('shares')
     if raw is None:
-        raise ValueError('invalid shares JSON: missing "shares" key')
+        raise ValueError('invalid shares JSON: missing "shares" or "share" key')
     shares = []
     for item in raw:
         if 'x' not in item or 'y' not in item:
-            raise ValueError('invalid share entry, expected {"x":..,"y":..}')
+            raise ValueError('invalid share entry, expected {"x":.."y":..}')
         shares.append((int(item['x']), int(item['y'])))
     return shares, meta
 
@@ -191,9 +211,10 @@ def cmd_generate(argv: List[str]) -> int:
     parser.add_argument('--minimum', '-m', type=int, help='threshold (minimum shares)', default=None)
     parser.add_argument('--shares', '-n', type=int, help='number of shares to create', default=None)
     parser.add_argument('--prime', help='prime modulus to use', default=None)
-    parser.add_argument('--out', '-o', help='output file (JSON). stdout if omitted', default=None)
+    parser.add_argument('--out', '-o', help='output file (JSON) or directory for split shares', default=None)
     parser.add_argument('--format', choices=['json', 'lines'], default='json')
     parser.add_argument('--kdf', help='KDF to apply for passphrases (sha256 or pbkdf2:ITER)', default=None)
+    parser.add_argument('--split-shares', action='store_true', help='output each share to a separate file')
     args = parser.parse_args(argv)
 
     # require secret CLI input
@@ -253,8 +274,31 @@ def cmd_generate(argv: List[str]) -> int:
         meta['kdf'] = kdf_meta
 
     if args.format == 'json':
-        text = _serialize_shares_json(shares, meta)
-        _write_output(args.out, text)
+        if args.split_shares:
+            # Write each share to a separate file
+            if args.out:
+                # Ensure output directory exists
+                out_dir = os.path.dirname(args.out) if os.path.dirname(args.out) else '.'
+                base_name = os.path.basename(args.out)
+                if base_name.endswith('.json'):
+                    base_name = base_name[:-5]
+                os.makedirs(out_dir, exist_ok=True)
+            else:
+                out_dir = '.'
+                base_name = 'share'
+            
+            for idx, share in enumerate(shares, 1):
+                share_json = _serialize_single_share_json(share, idx, meta)
+                share_path = os.path.join(out_dir, f"{base_name}-{idx}.json")
+                with open(share_path, 'w', encoding='utf-8') as f:
+                    f.write(share_json)
+            
+            if args.out:
+                print(f"Generated {len(shares)} share files: {base_name}-1.json to {base_name}-{len(shares)}.json", file=sys.stderr)
+        else:
+            # Original behavior: single file with all shares
+            text = _serialize_shares_json(shares, meta)
+            _write_output(args.out, text)
     else:
         # lines: each line "x y"
         lines = '\n'.join(f"{x} {y}" for x, y in shares)
@@ -264,37 +308,90 @@ def cmd_generate(argv: List[str]) -> int:
 
 def cmd_recover(argv: List[str]) -> int:
     parser = argparse.ArgumentParser(prog='recover', description='Recover secret from shares')
-    parser.add_argument('--shares-file', '-i', help='path to shares JSON (default stdin)', default=None)
+    parser.add_argument('--shares-file', '-i', help='path to shares JSON file(s), can specify multiple', nargs='*', default=None)
+    parser.add_argument('--shares-dir', '-d', help='directory containing share files', default=None)
     parser.add_argument('--format', choices=['json', 'lines'], default='json')
     parser.add_argument('--as-str', action='store_true', help='Attempt to decode the recovered secret as UTF-8')
     parser.add_argument('--out', '-o', help='output file (default stdout)', default=None)
     parser.add_argument('--prime', help='prime modulus to use', default=None)
     args = parser.parse_args(argv)
 
-    raw = None
-    if args.shares_file:
-        if not os.path.exists(args.shares_file):
-            print(f"Shares file not found: {args.shares_file}", file=sys.stderr)
+    shares = []
+    meta = {}
+    
+    # Collect files to read
+    files_to_read = []
+    
+    if args.shares_dir:
+        # Read all JSON files from directory
+        if not os.path.isdir(args.shares_dir):
+            print(f"Shares directory not found: {args.shares_dir}", file=sys.stderr)
             return 2
-        with open(args.shares_file, 'r', encoding='utf-8') as f:
-            raw = f.read()
-    else:
-        raw = sys.stdin.read()
-
-    if args.format == 'json':
-        shares, meta = _deserialize_shares_json(raw)
-    else:
-        shares = []
-        meta = {}
-        for line in raw.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            parts = line.split()
-            if len(parts) != 2:
-                print('invalid line in shares input: %r' % line, file=sys.stderr)
+        for filename in sorted(os.listdir(args.shares_dir)):
+            if filename.endswith('.json'):
+                files_to_read.append(os.path.join(args.shares_dir, filename))
+    elif args.shares_file:
+        # Multiple files specified
+        files_to_read = args.shares_file
+    
+    if files_to_read:
+        # Read from file(s)
+        all_shares = []
+        merged_meta = None
+        
+        for filepath in files_to_read:
+            if not os.path.exists(filepath):
+                print(f"Shares file not found: {filepath}", file=sys.stderr)
                 return 2
-            shares.append((int(parts[0]), int(parts[1])))
+            
+            with open(filepath, 'r', encoding='utf-8') as f:
+                raw = f.read()
+            
+            if args.format == 'json':
+                file_shares, file_meta = _deserialize_shares_json(raw)
+                all_shares.extend(file_shares)
+                
+                # Merge metadata (validate consistency)
+                if merged_meta is None:
+                    merged_meta = file_meta
+                else:
+                    # Validate critical metadata matches
+                    for key in ['minimum', 'shares', 'prime', 'secret_byte_length']:
+                        if key in merged_meta and key in file_meta:
+                            if merged_meta[key] != file_meta[key]:
+                                print(f"Warning: Inconsistent metadata '{key}' across share files", file=sys.stderr)
+                    # Preserve KDF info from first file
+                    if 'kdf' in file_meta and 'kdf' not in merged_meta:
+                        merged_meta['kdf'] = file_meta['kdf']
+            else:
+                for line in raw.splitlines():
+                    line = line.strip()
+                    if not line:
+                        continue
+                    parts = line.split()
+                    if len(parts) != 2:
+                        print('invalid line in shares input: %r' % line, file=sys.stderr)
+                        return 2
+                    all_shares.append((int(parts[0]), int(parts[1])))
+        
+        shares = all_shares
+        meta = merged_meta if merged_meta else {}
+    else:
+        # Read from stdin (original behavior)
+        raw = sys.stdin.read()
+        
+        if args.format == 'json':
+            shares, meta = _deserialize_shares_json(raw)
+        else:
+            for line in raw.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                parts = line.split()
+                if len(parts) != 2:
+                    print('invalid line in shares input: %r' % line, file=sys.stderr)
+                    return 2
+                shares.append((int(parts[0]), int(parts[1])))
 
     if len(shares) < 1:
         print('no shares provided', file=sys.stderr)
