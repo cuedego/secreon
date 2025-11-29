@@ -41,6 +41,7 @@
     {"x": 2, "y": 67890...}
   ]
 }
+
 ```
 
 #### Individual Share JSON Structure (Split Shares)
@@ -66,6 +67,7 @@ When using `--split-shares`, each share is written to a separate file:
     "y": 12345...
   }
 }
+
 ```
 
 **Benefits of Split Shares:**
@@ -73,6 +75,8 @@ When using `--split-shares`, each share is written to a separate file:
 - Each file is self-contained with complete metadata
 - Safer for distribution - no accidental exposure of multiple shares
 - Simplifies share management and tracking
+
+JSON Schemas for these formats are provided in `docs/share_schema.json`.
 
 #### Configuration (config/default.json)
 
@@ -82,6 +86,7 @@ When using `--split-shares`, each share is written to a separate file:
   "shares": 5,
   "prime": null
 }
+
 ```
 
 **Note**: Secrets must NEVER be stored in configuration files.
@@ -90,10 +95,13 @@ When using `--split-shares`, each share is written to a separate file:
 
 ### Core Functions
 
+
 #### `make_random_shares(secret, minimum, shares, prime=_PRIME)`
+
 Generates random Shamir shares for a secret.
 
 **Parameters:**
+
 - `secret` (int): The secret value to split
 - `minimum` (int): Threshold - number of shares needed to recover
 - `shares` (int): Total number of shares to generate
@@ -102,9 +110,11 @@ Generates random Shamir shares for a secret.
 **Returns:** List of (x, y) tuples representing share points
 
 #### `recover_secret(shares, prime=_PRIME)`
+
 Recovers the secret from share points using Lagrange interpolation.
 
 **Parameters:**
+
 - `shares` (list): List of (x, y) tuples
 - `prime` (int, optional): Prime modulus used in generation
 
@@ -112,12 +122,16 @@ Recovers the secret from share points using Lagrange interpolation.
 
 ### CLI Commands
 
+
 #### Generate Command
+
 ```bash
 python3 src/sss.py generate [OPTIONS]
+
 ```
 
 **Options:**
+
 - `--secret, -s`: Secret string
 - `--secret-file, -f`: Path to file containing secret
 - `--minimum, -m`: Threshold (default: 3)
@@ -129,11 +143,14 @@ python3 src/sss.py generate [OPTIONS]
 - `--split-shares`: Generate individual files for each share
 
 #### Recover Command
+
 ```bash
 python3 src/sss.py recover [OPTIONS]
+
 ```
 
 **Options:**
+
 - `--shares-file, -i`: Path(s) to shares JSON file(s), can specify multiple
 - `--shares-dir, -d`: Directory containing share files
 - `--format`: json|lines (default: json)
@@ -142,6 +159,7 @@ python3 src/sss.py recover [OPTIONS]
 - `--prime`: Override prime from metadata
 
 **Recovery Methods:**
+
 1. Single file: `--shares-file shares.json`
 2. Multiple files: `--shares-file share-1.json share-2.json share-3.json`
 3. Directory: `--shares-dir /path/to/shares/`
@@ -159,21 +177,26 @@ Shamir's Secret Sharing is based on polynomial interpolation over finite fields:
 ## Best Practices
 
 ### For BIP39 Seeds (24 words)
+
 ```bash
 # Use default prime (2^2203-1) - automatically handles BIP39 seeds
 # Use split shares for safer distribution
 python3 src/sss.py generate --secret-file seed.txt --minimum 3 --shares 5 \
   --out share.json --split-shares
+
 ```
 
 ### For Passphrases
+
 ```bash
 # Always use PBKDF2 with high iteration count
 python3 src/sss.py generate --secret "my passphrase" --kdf pbkdf2:200000 \
   --out shares.json
+
 ```
 
 ### For Critical Data Distribution
+
 ```bash
 # Split shares eliminate manual file editing risks
 python3 src/sss.py generate --secret-file critical.key --minimum 4 --shares 7 \
@@ -183,19 +206,24 @@ python3 src/sss.py generate --secret-file critical.key --minimum 4 --shares 7 \
 # Recovery from any 4 files:
 python3 src/sss.py recover --shares-file share-1.json share-3.json \
   share-5.json share-7.json --as-str
+
 ```
 
 ### For Files
+
 ```bash
 # Large files may need custom prime
 python3 src/sss.py generate --secret-file document.pdf --out shares.json
+
 ```
 
 ## Testing
 
 Run the test suite:
+
 ```bash
 python3 tests/test_sss.py
+
 ```
 
 All 17 tests should pass, including split shares functionality tests.
@@ -203,16 +231,23 @@ All 17 tests should pass, including split shares functionality tests.
 ## Troubleshooting
 
 ### "Secret exceeds prime" Error
+
 **Solution**: The default prime handles up to ~275 bytes. For larger secrets, specify a larger prime:
+
 ```bash
 --prime $((2**4096 - 1))
+
 ```
 
 ### Recovery Produces Garbled Output
+
 **Solution**: Use `--as-str` flag only for text secrets. For binary data, omit the flag and redirect output:
+
 ```bash
 python3 src/sss.py recover --shares-file shares.json > output.bin
+
 ```
 
 ### KDF Metadata Not Found
+
 This happens when recovering shares generated without KDF. The tool handles this automatically - no action needed.
