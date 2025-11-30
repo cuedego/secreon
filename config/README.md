@@ -21,6 +21,7 @@ This directory contains configuration files for Secreon.
 **NEVER store secrets, private keys, or seed phrases in configuration files!**
 
 Secrets must always be provided via:
+
 - `--secret` command line argument
 - `--secret-file` file input
 

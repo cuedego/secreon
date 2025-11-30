@@ -23,4 +23,5 @@ python3 src/sss.py recover --shares-file examples/demo-shares.json --as-str
 
 ## Important
 
-**Never commit real wallet seeds or private keys!** The files in this directory are for demonstration purposes only.
+**Never commit real wallet seeds or private keys!**
+The files in this directory are for demonstration purposes only.

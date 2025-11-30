@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Secreon - Shamir's Secret Sharing for secure secret management
+Secreon - Shamir's Secret Sharing tool for secure secret management
 
 Usage:
     secreon generate --secret "my secret" --out shares.json

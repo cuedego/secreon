@@ -79,33 +79,6 @@ python3 secreon.py recover --shares-dir /path/to/shares/ --as-str
 
 ```
 
-## Migration / Converting combined share files
-
-If you have an existing combined shares file (the legacy default format) and
-want to split it into individual share files for distribution, you can do so
-with a small script or one-liner. Example (Python one-liner):
-
-```bash
-python3 - <<'PY'
-import json,sys,os
-f = '/path/to/shares.json'
-out_prefix = 'share'
-os.makedirs('split-out', exist_ok=True)
-data = json.load(open(f))
-meta = data.get('meta', {})
-for i, s in enumerate(data.get('shares', []), 1):
-  fname = os.path.join('split-out', f"{out_prefix}-{i}.json")
-  obj = {'meta': dict(meta, share_index=i), 'share': s}
-  open(fname,'w').write(json.dumps(obj, indent=2))
-print('Wrote', len(data.get('shares', [])), 'files to split-out')
-PY
-
-```
-
-This creates `split-out/share-1.json`, `split-out/share-2.json`, etc., using
-the metadata from the combined file. The resulting files are compatible with
-the `--shares-file` and `--shares-dir` recovery options.
-
 ## Configuration
 
 Default parameters can be set in `config/default.json` (optional):
