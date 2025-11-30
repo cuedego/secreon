@@ -195,4 +195,4 @@ Shamir's Secret Sharing uses polynomial interpolation over a finite field. A sec
 
 ## License
 
-This implementation is released into the Public Domain under CC0 and OWFa licenses.
+This project is dedicated to the public domain under the CC0 1.0 Universal (CC0-1.0) waiver. See the `LICENSE` file for the full text.
