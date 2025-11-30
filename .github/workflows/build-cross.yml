@@ -1,0 +1,61 @@
+name: Build cross-platform executables
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: [3.11]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pyinstaller --onefile --name secreon --paths src \
+            --add-data "config:config" \
+            --add-data "README.md:." \
+            secreon.py
+
+      - name: Strip Linux binary (optional)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          strip dist/secreon || true
+
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          pyinstaller --onefile --name secreon.exe --paths src `
+            --add-data "config;config" `
+            --add-data "README.md;." `
+            secreon.py
+
+      - name: List dist folder
+        run: |
+          echo "Artifacts in dist/" && ls -la dist || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: secreon-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: |
+            dist/**
