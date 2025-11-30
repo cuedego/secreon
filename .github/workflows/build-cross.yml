@@ -49,9 +49,22 @@ jobs:
             --add-data "README.md;." `
             secreon.py
 
-      - name: List dist folder
+      - name: List dist folder (Linux)
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          echo "Artifacts in dist/" && ls -la dist || true
+          echo "Artifacts in dist/"
+          ls -la dist || true
+
+      - name: List dist folder (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        run: |
+          Write-Host "Artifacts in dist/"
+          if (Test-Path dist) {
+            Get-ChildItem -Path dist -Recurse | Format-Table
+          } else {
+            Write-Host "dist not found"
+          }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
