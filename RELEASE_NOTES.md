@@ -1,3 +1,78 @@
+# Secreon v1.0.1-beta — CLI Help Improvements
+
+**Date:** 2025-12-01
+
+## Summary
+
+This release improves the command-line help system to display complete usage information and properly show the executable name in all help contexts. The top-level help now clearly lists available subcommands (`generate` and `recover`) with descriptions.
+
+## Assets included
+
+- `secreon-win.exe` — Windows executable (64-bit)
+- `secreon-linux` — Linux executable (ELF, 64-bit)
+- `checksums.txt` — SHA-256 checksums for all artifacts
+
+## Highlights / Changes
+
+### Fixed
+- **CLI Help Display**: Fixed incomplete help output when running `secreon.exe generate -h` or `secreon.exe recover -h`
+  - Previously showed only: `usage: sss generate [-h]` with minimal options
+  - Now shows complete usage with all available options and the correct program name
+  - Top-level help (`secreon.exe -h`) now properly lists subcommands as positional arguments:
+    ```
+    positional arguments:
+      generate          Generate shares from a secret
+      recover           Recover secret from shares
+    ```
+
+### Technical improvements
+- Dynamic program name detection: help messages now reflect the actual executable name (e.g., `secreon.exe`, `secreon-linux`, or `secreon.py`)
+- Refactored argparse setup to prevent top-level parser from intercepting subcommand help flags
+- All 17 unit tests pass
+
+## Quickstart
+
+- Windows:
+  ```powershell
+  .\secreon-win.exe --help
+  .\secreon-win.exe generate --help
+  .\secreon-win.exe recover --help
+  ```
+
+- Linux:
+  ```bash
+  chmod +x secreon-linux
+  ./secreon-linux --help
+  ./secreon-linux generate --help
+  ./secreon-linux recover --help
+  ```
+
+## Verify integrity (checksums)
+
+The file `checksums.txt` contains SHA-256 hashes for the release artifacts. Verify locally:
+
+- Windows (PowerShell):
+  ```powershell
+  Get-FileHash .\secreon-win.exe -Algorithm SHA256
+  # Compare with checksums.txt
+  ```
+  
+- Linux/macOS:
+  ```bash
+  sha256sum -c checksums.txt
+  ```
+
+## Known issues & notes
+
+- The Linux executable was built on `ubuntu-latest` (GitHub runner). It may not run on very old distributions with older glibc.
+- `--onefile` binaries extract to a temporary directory at runtime; some antivirus products may flag this behavior.
+
+## License
+
+This repository is released under CC0 1.0 Universal — see `LICENSE` for the full text.
+
+---
+
 # Secreon v1.0.0-beta — Cross-platform binaries (Windows, Linux)
 
 **Date:** 2025-11-30
