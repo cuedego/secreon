@@ -33,3 +33,4 @@ Thumbs.db
 # Examples (optional - uncomment to commit examples)
 examples/*/shares.json
 examples/*/recovered-*
+src/__pycache__/

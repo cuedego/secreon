@@ -192,20 +192,49 @@ def _kdf_apply(kdf_spec: Optional[str], secret_input: bytes):
     raise ValueError('unsupported kdf spec: %s' % kdf_spec)
 
 def main():
-    parser = argparse.ArgumentParser(prog='sss', description='Shamir secret sharing tool')
-    sub = parser.add_subparsers(dest='cmd')
-    sub.add_parser('generate', help='Generate shares from a secret')
-    sub.add_parser('recover', help='Recover secret from shares')
-    args, rest = parser.parse_known_args()
-    if args.cmd == 'generate':
+    prog_name = os.path.basename(sys.argv[0]) if sys.argv and sys.argv[0] else 'secreon'
+    # Disable automatic -h handling at top-level so subcommands can receive -h
+    # Avoid creating top-level subparsers so that top-level parser doesn't
+    # intercept subcommand `-h`. Inspect argv manually and dispatch.
+    argv = sys.argv[1:]
+    cmd = None
+    rest = []
+    if len(argv) >= 1 and argv[0] in ('generate', 'recover'):
+        cmd = argv[0]
+        rest = argv[1:]
+    else:
+        rest = argv
+
+    # If no subcommand and the user passed -h/--help, show top-level help
+    if cmd is None and (('-h' in rest) or ('--help' in rest)):
+        # Print a concise top-level help that lists available subcommands
+        help_lines = []
+        help_lines.append(f"usage: {prog_name} [-h] command")
+        help_lines.append("")
+        help_lines.append("Shamir secret sharing tool")
+        help_lines.append("")
+        help_lines.append("positional arguments:")
+        help_lines.append("  generate          Generate shares from a secret")
+        help_lines.append("  recover           Recover secret from shares")
+        help_lines.append("")
+        help_lines.append("options:")
+        help_lines.append("  -h, --help        show this help message and exit")
+        print('\n'.join(help_lines))
+        return 0
+
+    if cmd == 'generate':
         return cmd_generate(rest)
-    if args.cmd == 'recover':
+    if cmd == 'recover':
         return cmd_recover(rest)
+
+    # No subcommand given
+    parser = argparse.ArgumentParser(prog=prog_name, description='Shamir secret sharing tool')
     parser.print_help()
     return 2
 
 def cmd_generate(argv: List[str]) -> int:
-    parser = argparse.ArgumentParser(prog='generate', description='Generate Shamir shares from a secret')
+    prog_name = os.path.basename(sys.argv[0]) if sys.argv and sys.argv[0] else 'secreon'
+    parser = argparse.ArgumentParser(prog=f"{prog_name} generate", description='Generate Shamir shares from a secret')
     parser.add_argument('--secret', '-s', help='secret string or integer', default=None)
     parser.add_argument('--secret-file', '-f', help='path to file containing secret', default=None)
     parser.add_argument('--minimum', '-m', type=int, help='threshold (minimum shares)', default=None)
@@ -310,7 +339,8 @@ def cmd_generate(argv: List[str]) -> int:
     return 0
 
 def cmd_recover(argv: List[str]) -> int:
-    parser = argparse.ArgumentParser(prog='recover', description='Recover secret from shares')
+    prog_name = os.path.basename(sys.argv[0]) if sys.argv and sys.argv[0] else 'secreon'
+    parser = argparse.ArgumentParser(prog=f"{prog_name} recover", description='Recover secret from shares')
     parser.add_argument('--shares-file', '-i', help='path to shares JSON file(s), can specify multiple', nargs='+', default=None)
     parser.add_argument('--shares-dir', '-d', help='directory containing share files', default=None)
     parser.add_argument('--format', choices=['json', 'lines'], default='json')
