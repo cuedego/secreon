@@ -2,48 +2,48 @@
 
 ## 📋 Overview
 
-**Objetivo**: Adicionar suporte a SLIP-39 no secreon para backup de wallets cripto usando Shamir's Secret Sharing com mnemonics human-readable.
+**Objective**: Add SLIP-39 support to secreon for crypto wallet backup using Shamir's Secret Sharing with human-readable mnemonics.
 
-**Status Atual**: Secreon usa SSS clássico com números grandes  
-**Estado Desejado**: Suporte a SLIP-39 padrão da indústria
+**Current Status**: Secreon uses classic SSS with large numbers  
+**Desired State**: SLIP-39 industry standard support
 
 ---
 
-## 🎯 Funcionalidades a Desenvolver
+## 🎯 Features to Develop
 
-### (a) Geração de Seed Phrase (24 palavras)
+### (a) Seed Phrase Generation (24 words)
 ```bash
 secreon slip39 generate-seed --out seed.txt
-# Output: 24 palavras BIP-39 (256 bits de entropia)
+# Output: 24 BIP-39 words (256 bits of entropy)
 ```
 
-**Por quê?**
-- Padrão da indústria para wallets cripto
-- Human-readable e fácil de escrever
-- Compatível com Trezor, Ledger, Electrum, etc.
+**Why?**
+- Industry standard for crypto wallets
+- Human-readable and easy to write
+- Compatible with Trezor, Ledger, Electrum, etc.
 
-### (b) Geração de Shares SLIP-39
+### (b) SLIP-39 Shares Generation
 ```bash
-# De seed gerada
+# From generated seed
 secreon slip39 generate --seed-file seed.txt --threshold 3 --shares 5
 
-# De secret fornecido
+# From provided secret
 secreon slip39 generate --master-secret <hex> --threshold 3 --shares 5
 ```
 
-**Output**: Shares como mnemonics de 20-33 palavras
+**Output**: Shares as 20-33 word mnemonics
 
-**Vantagens sobre SSS clássico**:
-- ✅ Human-readable (palavras vs números)
-- ✅ Checksum forte (RS1024)
-- ✅ Interoperável com wallets modernas
-- ✅ Esquema de grupos (flexibilidade)
+**Advantages over classic SSS**:
+- ✅ Human-readable (words vs numbers)
+- ✅ Strong checksum (RS1024)
+- ✅ Interoperable with modern wallets
+- ✅ Group scheme (flexibility)
 
 ---
 
-## 🏗️ Arquitetura Técnica
+## 🏗️ Technical Architecture
 
-### Stack Tecnológico
+### Technology Stack
 
 ```
 ┌─────────────────────────────────────┐
@@ -54,10 +54,10 @@ secreon slip39 generate --master-secret <hex> --threshold 3 --shares 5
 │  - combine_mnemonics()              │
 ├─────────────────────────────────────┤
 │  SLIP-39 Core                       │
-│  - SSS sobre GF(256)                │
-│  - Esquema de 2 níveis              │
+│  - SSS over GF(256)                 │
+│  - 2-level scheme                   │
 ├─────────────────────────────────────┤
-│  Criptografia                       │
+│  Cryptography                       │
 │  - Feistel cipher (4 rounds)       │
 │  - PBKDF2-HMAC-SHA256               │
 ├─────────────────────────────────────┤
@@ -66,7 +66,7 @@ secreon slip39 generate --master-secret <hex> --threshold 3 --shares 5
 │  - RS1024 checksum                  │
 │  - Mnemonic ↔ bytes                 │
 ├─────────────────────────────────────┤
-│  Matemática Fundamental             │
+│  Fundamental Mathematics            │
 │  - GF(256) arithmetic               │
 │  - Lagrange interpolation           │
 │  - BIP-39 wordlist                  │
@@ -74,287 +74,285 @@ secreon slip39 generate --master-secret <hex> --threshold 3 --shares 5
 └─────────────────────────────────────┘
 ```
 
-### Módulos Principais
+### Main Modules
 
-1. **gf256.py**: Aritmética Galois Field (256 elementos)
+1. **gf256.py**: Galois Field arithmetic (256 elements)
 2. **rs1024.py**: Reed-Solomon checksum
-3. **cipher.py**: Criptografia Feistel
-4. **share.py**: Estrutura de dados de share
-5. **shamir.py**: Núcleo do SSS
-6. **bip39.py**: Geração de seed phrases
-7. **cli.py**: Interface de linha de comando
+3. **cipher.py**: Feistel cryptography
+4. **share.py**: Share data structure
+5. **shamir.py**: SSS core
+6. **bip39.py**: Seed phrase generation
+7. **cli.py**: Command line interface
 
 ---
 
-## 📊 Comparação: SSS Clássico vs SLIP-39
+## 📊 Comparison: Classic SSS vs SLIP-39
 
-| Característica | SSS Clássico | SLIP-39 |
-|----------------|--------------|---------|
-| **Formato** | Números grandes (JSON) | Palavras (20-33) |
-| **Matemática** | GF(2^2203-1) | GF(256) |
-| **Checksum** | ❌ Nenhum | ✅ RS1024 (forte) |
-| **Digest** | ❌ Não | ✅ Sim (detecta fraude) |
-| **Criptografia** | Opcional (KDF) | ✅ Obrigatória (Feistel) |
-| **Níveis** | 1 (T-of-N) | 2 (grupos + membros) |
-| **Interoperável** | ❌ Não | ✅ Sim (Trezor, Ledger...) |
-| **UX** | Difícil | Excelente |
+| Feature | Classic SSS | SLIP-39 |
+|---------|-------------|---------|  
+| **Format** | Large numbers (JSON) | Words (20-33) |
+| **Mathematics** | GF(2^2203-1) | GF(256) |
+| **Checksum** | ❌ None | ✅ RS1024 (strong) |
+| **Digest** | ❌ No | ✅ Yes (detects fraud) |
+| **Cryptography** | Optional (KDF) | ✅ Mandatory (Feistel) |
+| **Levels** | 1 (T-of-N) | 2 (groups + members) |
+| **Interoperable** | ❌ No | ✅ Yes (Trezor, Ledger...) |
+| **UX** | Difficult | Excellent |
 
-**Conclusão**: SLIP-39 é superior em todos os aspectos relevantes para usuários finais.
+**Conclusion**: SLIP-39 is superior in all aspects relevant to end users.---
 
----
+## 📅 Implementation Plan
 
-## 📅 Plano de Implementação
-
-### Fase 1: Fundamentos (1-2 semanas)
+### Phase 1: Foundations (1-2 weeks)
 - [x] GF(256) arithmetic
 - [x] RS1024 checksum
 - [x] Wordlists (SLIP-39 + BIP-39)
 - [x] BIP-39 seed generation
 
-### Fase 2: Core SSS (2 semanas)
+### Phase 2: Core SSS (2 weeks)
 - [x] Feistel cipher
 - [x] Share encoding/decoding
-- [x] SSS sobre GF(256)
+- [x] SSS over GF(256)
 - [x] High-level API
 
-### Fase 3: CLI (1 semana)
+### Phase 3: CLI (1 week)
 - [x] `slip39 generate-seed`
 - [x] `slip39 generate`
 - [x] `slip39 recover`
 
-### Fase 4: Testes & Qualidade (1-2 semanas)
-- [x] Test vectors oficiais
+### Phase 4: Testing & Quality (1-2 weeks)
+- [x] Official test vectors
 - [x] Cross-implementation testing
 - [x] Property-based tests
 - [x] Security review
 
-### Fase 5: Documentação (1 semana)
+### Phase 5: Documentation (1 week)
 - [x] User documentation
 - [x] Technical documentation
 - [x] Examples & demos
 
-**Total**: 5-6 semanas full-time (200-240 horas)  
-**MVP**: 2-3 semanas (funcionalidade básica)
+**Total**: 5-6 weeks full-time (200-240 hours)  
+**MVP**: 2-3 weeks (basic functionality)
 
 ---
 
-## 🎬 Casos de Uso
+## 🎬 Use Cases
 
-### 1. Backup Pessoal Simples
+### 1. Simple Personal Backup
 ```
-Usuário → Gera seed → Cria 3-of-5 shares → Distribui
-Locais: Casa, Trabalho, Cofre, Amigo A, Amigo B
-Recuperação: Qualquer 3 shares
+User → Generate seed → Create 3-of-5 shares → Distribute
+Locations: Home, Work, Safe, Friend A, Friend B
+Recovery: Any 3 shares
 ```
 
-### 2. Backup Familiar (2 Níveis)
+### 2. Family Backup (2 Levels)
 ```
-Grupo 1 (Você): 2-of-2 shares
-Grupo 2 (Família): 3-of-5 shares
-Group Threshold: 1 (qualquer grupo completo)
+Group 1 (You): 2-of-2 shares
+Group 2 (Family): 3-of-5 shares
+Group Threshold: 1 (any complete group)
 
-Recuperação:
-- Você sozinho: 2 shares do Grupo 1
-- Família: 3 shares do Grupo 2
+Recovery:
+- You alone: 2 shares from Group 1
+- Family: 3 shares from Group 2
 ```
 
 ### 3. Corporate Multi-Sig
 ```
-Grupo 1 (Diretores): 2-of-3
-Grupo 2 (Técnicos): 3-of-5
-Grupo 3 (Compliance): 2-of-3
-Group Threshold: 2 (dois grupos necessários)
+Group 1 (Directors): 2-of-3
+Group 2 (Technical): 3-of-5
+Group 3 (Compliance): 2-of-3
+Group Threshold: 2 (two groups required)
 
-Recuperação: Qualquer 2 grupos completos + passphrase
+Recovery: Any 2 complete groups + passphrase
 ```
 
 ---
 
-## 🔐 Segurança
+## 🔐 Security
 
-### Garantias:
-- ✅ Qualquer T shares recupera o secret
-- ✅ T-1 shares não vaza informação
-- ✅ Checksum detecta até 3 erros com certeza
-- ✅ Digest detecta shares maliciosas
-- ✅ PBKDF2 protege contra brute-force
-- ✅ Passphrase opcional (plausible deniability)
+### Guarantees:
+- ✅ Any T shares recover the secret
+- ✅ T-1 shares don't leak information
+- ✅ Checksum detects up to 3 errors with certainty
+- ✅ Digest detects malicious shares
+- ✅ PBKDF2 protects against brute-force
+- ✅ Optional passphrase (plausible deniability)
 
-### Mitigações de Risco:
-- **Bugs cripto**: TDD + test vectors + code review
-- **Incompatibilidade**: Cross-testing com python-shamir-mnemonic
-- **UX complexa**: Modo simples por padrão + docs claras
-- **Performance**: Esperada e aceitável (PBKDF2 dominante)
-
----
-
-## 📚 Entregáveis
-
-### Documentação
-- ✅ **SLIP39_REQUIREMENTS.md**: Requisitos completos e detalhados
-- ✅ **SLIP39_IMPLEMENTATION_PLAN.md**: Plano de desenvolvimento em etapas
-- ✅ **SLIP39_UNDERSTANDING.md**: Entendimento técnico profundo
-- ✅ **SLIP39_SUMMARY.md**: Este resumo executivo
-
-### Código (futuro)
-- [ ] Implementação completa em `src/slip39/`
-- [ ] Testes abrangentes em `tests/slip39/`
-- [ ] CLI funcional
-- [ ] Exemplos práticos
+### Risk Mitigations:
+- **Crypto bugs**: TDD + test vectors + code review
+- **Incompatibility**: Cross-testing with python-shamir-mnemonic
+- **Complex UX**: Simple mode by default + clear docs
+- **Performance**: Expected and acceptable (PBKDF2 dominant)
 
 ---
 
-## 🎯 Critérios de Sucesso
+## 📚 Deliverables
 
-### MVP (Mínimo Viável):
-- ✅ Gerar BIP-39 seed de 24 palavras
-- ✅ Converter BIP-39 → master secret
-- ✅ Gerar SLIP-39 shares (T-of-N simples)
-- ✅ Recuperar master secret de shares
-- ✅ Passar test vectors básicos
-- ✅ CLI funcional
+### Documentation
+- ✅ **SLIP39_REQUIREMENTS.md**: Complete and detailed requirements
+- ✅ **SLIP39_IMPLEMENTATION_PLAN.md**: Step-by-step development plan
+- ✅ **SLIP39_UNDERSTANDING.md**: Deep technical understanding
+- ✅ **SLIP39_SUMMARY.md**: This executive summary
 
-### Feature Completa:
-- ✅ Esquema de dois níveis (grupos)
-- ✅ Suporte a passphrase
-- ✅ Configuração de iteration exponent
-- ✅ 100% compatível com especificação
-- ✅ Interoperável com outras implementações
-- ✅ Documentação completa
-- ✅ Cobertura de testes >80%
+### Code (future)
+- [ ] Complete implementation in `src/slip39/`
+- [ ] Comprehensive tests in `tests/slip39/`
+- [ ] Functional CLI
+- [ ] Practical examples
 
 ---
 
-## 💡 Recomendações
+## 🎯 Success Criteria
 
-### Para LLM de Desenvolvimento:
+### MVP (Minimum Viable):
+- ✅ Generate 24-word BIP-39 seed
+- ✅ Convert BIP-39 → master secret
+- ✅ Generate SLIP-39 shares (simple T-of-N)
+- ✅ Recover master secret from shares
+- ✅ Pass basic test vectors
+- ✅ Functional CLI
 
-1. **Começar pelo MVP**:
-   - Foco em funcionalidade básica primeiro
-   - Validação incremental a cada etapa
-   - Features avançadas depois
+### Complete Feature:
+- ✅ Two-level scheme (groups)
+- ✅ Passphrase support
+- ✅ Iteration exponent configuration
+- ✅ 100% compatible with specification
+- ✅ Interoperable with other implementations
+- ✅ Complete documentation
+- ✅ Test coverage >80%
 
-2. **Seguir a Especificação Rigorosamente**:
-   - SLIP-39 spec é autoritativa
-   - python-shamir-mnemonic como referência de implementação
-   - Test vectors oficiais como validação
+---
 
-3. **Priorizar Testes**:
-   - TDD desde o início
-   - Test vectors a cada etapa
+## 💡 Recommendations
+
+### For Development LLM:
+
+1. **Start with MVP**:
+   - Focus on basic functionality first
+   - Incremental validation at each step
+   - Advanced features later
+
+2. **Follow Specification Rigorously**:
+   - SLIP-39 spec is authoritative
+   - python-shamir-mnemonic as reference implementation
+   - Official test vectors for validation
+
+3. **Prioritize Tests**:
+   - TDD from the start
+   - Test vectors at each step
    - Cross-implementation testing
 
-4. **Documentar Decisões**:
-   - Comentários no código
-   - Justificar desvios (se houver)
-   - Manter rastreabilidade
+4. **Document Decisions**:
+   - Code comments
+   - Justify deviations (if any)
+   - Maintain traceability
 
-5. **Iteração Rápida**:
-   - Etapas pequenas e testáveis
-   - Feedback contínuo
-   - Ajustar plano conforme necessário
+5. **Rapid Iteration**:
+   - Small testable steps
+   - Continuous feedback
+   - Adjust plan as needed
 
-### Ordem Recomendada de Implementação:
+### Recommended Implementation Order:
 
 ```
-1. gf256.py        (2 dias)   ← Começa aqui
-2. rs1024.py       (2 dias)
-3. wordlist.py     (1 dia)
-4. bip39.py        (1-2 dias)
-5. cipher.py       (2-3 dias)
-6. share.py        (2 dias)
-7. shamir.py       (3-4 dias)
-8. cli.py          (2-3 dias)
-9. test_vectors.py (2 dias)
-10. docs & polish  (2-3 dias)
+1. gf256.py        (2 days)   ← Start here
+2. rs1024.py       (2 days)
+3. wordlist.py     (1 day)
+4. bip39.py        (1-2 days)
+5. cipher.py       (2-3 days)
+6. share.py        (2 days)
+7. shamir.py       (3-4 days)
+8. cli.py          (2-3 days)
+9. test_vectors.py (2 days)
+10. docs & polish  (2-3 days)
 ```
 
 ---
 
-## 📞 Recursos e Referências
+## 📞 Resources and References
 
-### Especificações:
+### Specifications:
 - **SLIP-39**: https://github.com/satoshilabs/slips/blob/master/slip-0039.md
 - **BIP-39**: https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki
 - **BIP-32**: https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki
 
-### Implementações de Referência:
+### Reference Implementations:
 - **Python**: https://github.com/trezor/python-shamir-mnemonic
 - **JavaScript**: https://github.com/ilap/slip39-js
 - **Rust**: https://github.com/Internet-of-People/slip39-rust
 
-### Ferramentas:
+### Tools:
 - **Test Vectors**: https://github.com/trezor/python-shamir-mnemonic/blob/master/vectors.json
 - **SLIP-39 Wordlist**: https://github.com/satoshilabs/slips/blob/master/slip-0039/wordlist.txt
-- **BIP-39 Wordlist**: Incluída em várias implementações
+- **BIP-39 Wordlist**: Included in various implementations
 
-### Suporte:
-- **Issues do secreon**: https://github.com/cuedego/secreon/issues
+### Support:
+- **Secreon issues**: https://github.com/cuedego/secreon/issues
 - **SLIP-39 spec issues**: https://github.com/satoshilabs/slips/issues
 
 ---
 
-## ✅ Próximos Passos
+## ✅ Next Steps
 
-### Imediato:
-1. ✅ Review desta documentação
-2. ⏭️ Setup ambiente de desenvolvimento
-3. ⏭️ Download de recursos (wordlists, test vectors)
-4. ⏭️ Instalar python-shamir-mnemonic (referência)
+### Immediate:
+1. ✅ Review this documentation
+2. ⏭️ Setup development environment
+3. ⏭️ Download resources (wordlists, test vectors)
+4. ⏭️ Install python-shamir-mnemonic (reference)
 
-### Primeira Iteração (MVP):
-1. ⏭️ Implementar GF(256) + testes
-2. ⏭️ Implementar RS1024 + testes
-3. ⏭️ Implementar core SSS
-4. ⏭️ Implementar CLI básica
-5. ⏭️ Validar com test vectors
+### First Iteration (MVP):
+1. ⏭️ Implement GF(256) + tests
+2. ⏭️ Implement RS1024 + tests
+3. ⏭️ Implement core SSS
+4. ⏭️ Implement basic CLI
+5. ⏭️ Validate with test vectors
 
-### Após MVP:
-1. ⏭️ Adicionar esquema de dois níveis
-2. ⏭️ Adicionar passphrase
+### After MVP:
+1. ⏭️ Add two-level scheme
+2. ⏭️ Add passphrase
 3. ⏭️ Cross-implementation testing
-4. ⏭️ Documentação final
+4. ⏭️ Final documentation
 5. ⏭️ Release 🎉
 
 ---
 
-## 📈 Valor Entregue
+## 📈 Value Delivered
 
-### Para Usuários:
-- ✅ Backup seguro de wallets cripto
-- ✅ Interoperabilidade com hardware wallets
-- ✅ UX superior (palavras vs números)
-- ✅ Flexibilidade (esquemas complexos)
+### For Users:
+- ✅ Secure crypto wallet backup
+- ✅ Interoperability with hardware wallets
+- ✅ Superior UX (words vs numbers)
+- ✅ Flexibility (complex schemes)
 
-### Para o Projeto:
-- ✅ Compatibilidade com padrão da indústria
-- ✅ Feature diferenciadora
-- ✅ Base para futuras expansões
-- ✅ Comunidade cripto como público-alvo
+### For the Project:
+- ✅ Industry standard compatibility
+- ✅ Differentiating feature
+- ✅ Foundation for future expansions
+- ✅ Crypto community as target audience
 
-### Técnico:
-- ✅ Código bem estruturado e testado
-- ✅ Documentação completa
-- ✅ Manutenibilidade a longo prazo
-- ✅ Padrão de qualidade elevado
-
----
-
-## 🎓 Conclusão
-
-A implementação de SLIP-39 no secreon é:
-- ✅ **Viável**: Plano detalhado e factível
-- ✅ **Valiosa**: Benefícios claros para usuários
-- ✅ **Bem Definida**: Requisitos e arquitetura sólidos
-- ✅ **Testável**: Estratégia de validação robusta
-- ✅ **Completa**: Documentação abrangente
-
-**Recomendação**: PROCEED WITH IMPLEMENTATION 🚀
+### Technical:
+- ✅ Well-structured and tested code
+- ✅ Complete documentation
+- ✅ Long-term maintainability
+- ✅ High quality standard
 
 ---
 
-**Documento Criado**: 2025-12-06  
-**Versão**: 1.0  
+## 🎓 Conclusion
+
+SLIP-39 implementation in secreon is:
+- ✅ **Feasible**: Detailed and achievable plan
+- ✅ **Valuable**: Clear benefits for users
+- ✅ **Well Defined**: Solid requirements and architecture
+- ✅ **Testable**: Robust validation strategy
+- ✅ **Complete**: Comprehensive documentation
+
+**Recommendation**: PROCEED WITH IMPLEMENTATION 🚀
+
+---
+
+**Document Created**: 2025-12-06  
+**Version**: 1.0  
 **Status**: APPROVED FOR DEVELOPMENT  
-**Próxima Ação**: Começar Fase 1 (gf256.py)
+**Next Action**: Start Phase 1 (gf256.py)
 

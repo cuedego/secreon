@@ -1,126 +1,126 @@
 # Secreon Documentation
 
-Este diretório contém a documentação completa do projeto secreon.
+This directory contains the complete documentation for the secreon project.
 
-## 📚 Índice de Documentos
+## 📚 Document Index
 
-### Documentação Geral
-- **TECHNICAL.md** - Documentação técnica do secreon atual (SSS clássico)
-- **share_schema.json** - Schema JSON para formato de shares
+### General Documentation
+- **TECHNICAL.md** - Technical documentation for current secreon (classic SSS)
+- **share_schema.json** - JSON schema for share format
 
-### Documentação SLIP-39 (Nova Feature)
+### SLIP-39 Documentation (New Feature)
 
-A documentação para implementação de suporte a SLIP-39 está organizada em 4 documentos complementares:
+The documentation for SLIP-39 support implementation is organized into 4 complementary documents:
 
 #### 1. SLIP39_SUMMARY.md 🎯
-**Propósito**: Resumo executivo e visão geral  
-**Público-alvo**: Todos (stakeholders, desenvolvedores, usuários)  
-**Conteúdo**:
-- Overview da feature
-- Comparação SSS clássico vs SLIP-39
-- Casos de uso práticos
-- Timeline e estimativas
-- Próximos passos
+**Purpose**: Executive summary and overview  
+**Target audience**: Everyone (stakeholders, developers, users)  
+**Content**:
+- Feature overview
+- Classic SSS vs SLIP-39 comparison
+- Practical use cases
+- Timeline and estimates
+- Next steps
 
-**📖 Leia primeiro se você quer**: Entender rapidamente o que é SLIP-39 e por que implementá-lo
+**📖 Read this first if you want to**: Quickly understand what SLIP-39 is and why implement it
 
 ---
 
 #### 2. SLIP39_REQUIREMENTS.md 📋
-**Propósito**: Especificação completa de requisitos  
-**Público-alvo**: Desenvolvedores, arquitetos, QA  
-**Conteúdo**:
-- Requisitos funcionais (FR-1 a FR-10)
-- Requisitos não-funcionais (NFR-1 a NFR-4)
-- Arquitetura de módulos
-- Critérios de aceite
+**Purpose**: Complete requirements specification  
+**Target audience**: Developers, architects, QA  
+**Content**:
+- Functional requirements (FR-1 to FR-10)
+- Non-functional requirements (NFR-1 to NFR-4)
+- Module architecture
+- Acceptance criteria
 - Test vectors
-- Glossário e referências
+- Glossary and references
 
-**📖 Leia se você precisa**: Entender TODOS os requisitos em detalhes para implementação
+**📖 Read if you need to**: Understand ALL requirements in detail for implementation
 
 ---
 
 #### 3. SLIP39_IMPLEMENTATION_PLAN.md 📅
-**Propósito**: Plano de desenvolvimento em etapas  
-**Público-alvo**: Desenvolvedores, gerentes de projeto  
-**Conteúdo**:
-- 5 fases de desenvolvimento
-- Etapas detalhadas com tarefas, entregáveis e critérios
-- Estimativas de tempo
-- Priorização (MVP vs feature completa)
-- Riscos e mitigações
-- Checkpoints de validação
+**Purpose**: Step-by-step development plan  
+**Target audience**: Developers, project managers  
+**Content**:
+- 5 development phases
+- Detailed steps with tasks, deliverables, and criteria
+- Time estimates
+- Prioritization (MVP vs complete feature)
+- Risks and mitigations
+- Validation checkpoints
 
-**📖 Leia se você vai**: Implementar a feature e precisa de um roadmap detalhado
+**📖 Read if you're going to**: Implement the feature and need a detailed roadmap
 
 ---
 
 #### 4. SLIP39_UNDERSTANDING.md 🧠
-**Propósito**: Análise técnica profunda e justificativas  
-**Público-alvo**: Desenvolvedores experientes, arquitetos  
-**Conteúdo**:
-- Contexto técnico detalhado
-- Diferenças fundamentais SSS clássico vs SLIP-39
-- Desafios técnicos e soluções
-- Arquitetura proposta
-- Estratégia de implementação
-- Análise de riscos
+**Purpose**: Deep technical analysis and rationale  
+**Target audience**: Experienced developers, architects  
+**Content**:
+- Detailed technical context
+- Fundamental differences: classic SSS vs SLIP-39
+- Technical challenges and solutions
+- Proposed architecture
+- Implementation strategy
+- Risk analysis
 
-**📖 Leia se você quer**: Entendimento profundo da arquitetura e decisões técnicas
+**📖 Read if you want**: Deep understanding of architecture and technical decisions
 
 ---
 
-## 🎯 Como Usar Esta Documentação
+## 🎯 How to Use This Documentation
 
-### Para Stakeholders / Product Owners:
-1. ✅ Comece com **SLIP39_SUMMARY.md**
-2. ⏭️ Revise casos de uso e timeline
-3. ⏭️ Aprove ou sugira ajustes
+### For Stakeholders / Product Owners:
+1. ✅ Start with **SLIP39_SUMMARY.md**
+2. ⏭️ Review use cases and timeline
+3. ⏭️ Approve or suggest adjustments
 
-### Para Gerentes de Projeto:
-1. ✅ Leia **SLIP39_SUMMARY.md** (contexto)
-2. ✅ Estude **SLIP39_IMPLEMENTATION_PLAN.md** (planejamento)
-3. ⏭️ Use estimativas para planejamento de sprint/release
+### For Project Managers:
+1. ✅ Read **SLIP39_SUMMARY.md** (context)
+2. ✅ Study **SLIP39_IMPLEMENTATION_PLAN.md** (planning)
+3. ⏭️ Use estimates for sprint/release planning
 
-### Para Desenvolvedores (Implementação):
-1. ✅ Leia **SLIP39_SUMMARY.md** (overview)
-2. ✅ Estude **SLIP39_REQUIREMENTS.md** (requisitos completos)
-3. ✅ Siga **SLIP39_IMPLEMENTATION_PLAN.md** (etapas)
-4. ✅ Consulte **SLIP39_UNDERSTANDING.md** para dúvidas técnicas
+### For Developers (Implementation):
+1. ✅ Read **SLIP39_SUMMARY.md** (overview)
+2. ✅ Study **SLIP39_REQUIREMENTS.md** (complete requirements)
+3. ✅ Follow **SLIP39_IMPLEMENTATION_PLAN.md** (steps)
+4. ✅ Consult **SLIP39_UNDERSTANDING.md** for technical questions
 
-### Para Arquitetos / Tech Leads:
-1. ✅ Leia **SLIP39_UNDERSTANDING.md** (análise técnica profunda)
-2. ✅ Revise **SLIP39_REQUIREMENTS.md** (requisitos arquiteturais)
-3. ⏭️ Valide decisões de design
-4. ⏭️ Faça code review guiado pelos requisitos
+### For Architects / Tech Leads:
+1. ✅ Read **SLIP39_UNDERSTANDING.md** (deep technical analysis)
+2. ✅ Review **SLIP39_REQUIREMENTS.md** (architectural requirements)
+3. ⏭️ Validate design decisions
+4. ⏭️ Conduct code review guided by requirements
 
-### Para QA / Testers:
-1. ✅ Leia **SLIP39_SUMMARY.md** (contexto)
-2. ✅ Foque em **SLIP39_REQUIREMENTS.md** seções:
-   - Critérios de aceite
+### For QA / Testers:
+1. ✅ Read **SLIP39_SUMMARY.md** (context)
+2. ✅ Focus on **SLIP39_REQUIREMENTS.md** sections:
+   - Acceptance criteria
    - Test vectors
-   - Casos de uso
-3. ⏭️ Crie test plans baseados nos requisitos
+   - Use cases
+3. ⏭️ Create test plans based on requirements
 
-### Para LLMs (Agentes de Desenvolvimento):
-1. ✅ Contexto inicial: **SLIP39_SUMMARY.md**
-2. ✅ Requisitos completos: **SLIP39_REQUIREMENTS.md**
+### For LLMs (Development Agents):
+1. ✅ Initial context: **SLIP39_SUMMARY.md**
+2. ✅ Complete requirements: **SLIP39_REQUIREMENTS.md**
 3. ✅ Roadmap: **SLIP39_IMPLEMENTATION_PLAN.md**
-4. ✅ Detalhes técnicos: **SLIP39_UNDERSTANDING.md**
-5. ⏭️ Seguir ordem das etapas do plano
-6. ⏭️ Validar contra requisitos a cada etapa
+4. ✅ Technical details: **SLIP39_UNDERSTANDING.md**
+5. ⏭️ Follow plan step order
+6. ⏭️ Validate against requirements at each step
 
 ---
 
-## 🔗 Documentos Relacionados
+## 🔗 Related Documents
 
-### Externos (Especificações):
+### External (Specifications):
 - [SLIP-39 Specification](https://github.com/satoshilabs/slips/blob/master/slip-0039.md) - Especificação oficial
 - [BIP-39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) - Mnemonic code for HD wallets
 - [BIP-32](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki) - Hierarchical Deterministic Wallets
 
-### Externos (Implementações de Referência):
+### External (Reference Implementations):
 - [python-shamir-mnemonic](https://github.com/trezor/python-shamir-mnemonic) - Implementação de referência oficial
 - [Test Vectors](https://github.com/trezor/python-shamir-mnemonic/blob/master/vectors.json) - Test vectors oficiais
 
@@ -135,81 +135,81 @@ A documentação para implementação de suporte a SLIP-39 está organizada em 4
 
 ```
 docs/
-├── SLIP39_SUMMARY.md              # 📄 ~350 linhas
-│   └── O que? Por quê? Como? (overview executivo)
+├── SLIP39_SUMMARY.md              # 📄 ~350 lines
+│   └── What? Why? How? (executive overview)
 │
-├── SLIP39_REQUIREMENTS.md         # 📄 ~700 linhas
-│   └── Requisitos detalhados (FR + NFR + critérios)
+├── SLIP39_REQUIREMENTS.md         # 📄 ~700 lines
+│   └── Detailed requirements (FR + NFR + criteria)
 │
-├── SLIP39_IMPLEMENTATION_PLAN.md  # 📄 ~800 linhas
-│   └── Plano de desenvolvimento em 5 fases + etapas
+├── SLIP39_IMPLEMENTATION_PLAN.md  # 📄 ~800 lines
+│   └── Development plan in 5 phases + steps
 │
-└── SLIP39_UNDERSTANDING.md        # 📄 ~650 linhas
-    └── Análise técnica profunda + arquitetura
+└── SLIP39_UNDERSTANDING.md        # 📄 ~650 lines
+    └── Deep technical analysis + architecture
 ```
 
-**Total**: ~2500 linhas de documentação completa e estruturada
+**Total**: ~2500 lines of complete and structured documentation
 
 ---
 
-## 🎓 Conceitos-Chave
+## 🎓 Key Concepts
 
 ### SLIP-39
-Padrão para backup de wallets cripto usando Shamir's Secret Sharing com mnemonics human-readable.
+Standard for crypto wallet backup using Shamir's Secret Sharing with human-readable mnemonics.
 
 ### Shamir's Secret Sharing (SSS)
-Esquema criptográfico para dividir um secret em N shares, onde qualquer T shares podem reconstruir o secret original.
+Cryptographic scheme to split a secret into N shares, where any T shares can reconstruct the original secret.
 
 ### BIP-39
-Padrão para representar entropy como mnemonic de 12-24 palavras.
+Standard for representing entropy as 12-24 word mnemonics.
 
 ### Master Secret
-O secret original a ser protegido (128-256 bits). Em contexto de wallets cripto, é o BIP-32 master seed.
+The original secret to be protected (128-256 bits). In crypto wallet context, it's the BIP-32 master seed.
 
 ### Encrypted Master Secret (EMS)
-Master secret após criptografia com Feistel cipher e PBKDF2.
+Master secret after encryption with Feistel cipher and PBKDF2.
 
 ### GF(256)
-Galois Field com 256 elementos, usado para aritmética em SLIP-39.
+Galois Field with 256 elements, used for arithmetic in SLIP-39.
 
 ### RS1024
-Reed-Solomon code sobre GF(1024) usado para checksum forte.
+Reed-Solomon code over GF(1024) used for strong checksum.
 
 ---
 
-## ✅ Status da Documentação
+## ✅ Documentation Status
 
-- ✅ **SLIP39_SUMMARY.md** - Completo
-- ✅ **SLIP39_REQUIREMENTS.md** - Completo
-- ✅ **SLIP39_IMPLEMENTATION_PLAN.md** - Completo
-- ✅ **SLIP39_UNDERSTANDING.md** - Completo
-- ⏭️ Implementação - A fazer
-- ⏭️ User documentation final - Após implementação
-
----
-
-## 🤝 Contribuindo
-
-Esta documentação foi criada como especificação para desenvolvimento da feature SLIP-39. 
-
-Durante a implementação:
-1. Mantenha os documentos atualizados se houver mudanças de requisitos
-2. Adicione notas de implementação em SLIP39_UNDERSTANDING.md
-3. Documente decisões técnicas importantes
-4. Atualize status nos checkpoints
+- ✅ **SLIP39_SUMMARY.md** - Complete
+- ✅ **SLIP39_REQUIREMENTS.md** - Complete
+- ✅ **SLIP39_IMPLEMENTATION_PLAN.md** - Complete
+- ✅ **SLIP39_UNDERSTANDING.md** - Complete
+- ⏭️ Implementation - To do
+- ⏭️ Final user documentation - After implementation
 
 ---
 
-## 📞 Suporte
+## 🤝 Contributing
 
-Para dúvidas sobre a documentação ou implementação:
-- Revise os 4 documentos SLIP-39 (provavelmente está documentado)
-- Consulte especificação oficial SLIP-39
-- Abra issue no repositório do secreon
+This documentation was created as specification for SLIP-39 feature development. 
+
+During implementation:
+1. Keep documents updated if requirements change
+2. Add implementation notes to SLIP39_UNDERSTANDING.md
+3. Document important technical decisions
+4. Update status at checkpoints
 
 ---
 
-**Última Atualização**: 2025-12-06  
-**Versão da Documentação**: 1.0  
+## 📞 Support
+
+For questions about documentation or implementation:
+- Review the 4 SLIP-39 documents (probably documented there)
+- Consult official SLIP-39 specification
+- Open issue in secreon repository
+
+---
+
+**Last Updated**: 2025-12-07  
+**Documentation Version**: 1.0  
 **Status**: READY FOR REVIEW AND DEVELOPMENT
 

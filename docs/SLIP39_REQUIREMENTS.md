@@ -2,34 +2,34 @@
 
 ## Executive Summary
 
-Este documento define os requisitos para implementar suporte a SLIP-39 (Shamir's Secret-Sharing for Mnemonic Codes) no secreon, permitindo:
-1. Geração de seed phrases de 24 palavras (master secret)
-2. Divisão de secrets em shares usando mnemonics SLIP-39
-3. Recuperação de secrets a partir de mnemonics SLIP-39
+This document defines requirements for implementing SLIP-39 (Shamir's Secret-Sharing for Mnemonic Codes) support in secreon, enabling:
+1. Generation of 24-word seed phrases (master secret)
+2. Splitting secrets into shares using SLIP-39 mnemonics
+3. Recovery of secrets from SLIP-39 mnemonics
 
 ## Context and Background
 
 ### Current State (Secreon v1)
-O secreon atualmente implementa:
-- Shamir's Secret Sharing (SSS) clássico usando aritmética sobre campo primo (2^2203-1)
-- Conversão de secrets (strings/arquivos) para inteiros
-- Geração de shares como pares (x, y)
-- Serialização em JSON
-- Suporte a KDF (SHA-256, PBKDF2) para passphrases
+Secreon currently implements:
+- Classic Shamir's Secret Sharing (SSS) using arithmetic over prime field (2^2203-1)
+- Conversion of secrets (strings/files) to integers
+- Share generation as (x, y) pairs
+- JSON serialization
+- KDF support (SHA-256, PBKDF2) for passphrases
 
 ### SLIP-39 Overview
-SLIP-39 é um padrão para backup de wallets hierárquicas determinísticas (BIP-32) usando SSS, definido em:
-- Especificação: https://github.com/satoshilabs/slips/blob/master/slip-0039.md
-- Implementação de referência: https://github.com/trezor/python-shamir-mnemonic
+SLIP-39 is a standard for hierarchical deterministic wallet backup (BIP-32) using SSS, defined in:
+- Specification: https://github.com/satoshilabs/slips/blob/master/slip-0039.md
+- Reference Implementation: https://github.com/trezor/python-shamir-mnemonic
 
-**Características principais:**
-- Mnemonics de 20-33 palavras (dependendo do tamanho do master secret)
-- Wordlist fixa de 1024 palavras
-- Esquema de dois níveis: grupos (GT-of-G) e membros (Ti-of-Ni)
-- Checksum RS1024 (Reed-Solomon)
-- Criptografia do master secret com PBKDF2/Feistel network
-- Suporte a passphrase opcional
-- GF(256) para aritmética (ao invés de campo primo grande)
+**Key features:**
+- Mnemonics of 20-33 words (depending on master secret size)
+- Fixed wordlist of 1024 words
+- Two-level scheme: groups (GT-of-G) and members (Ti-of-Ni)
+- RS1024 checksum (Reed-Solomon)
+- Master secret encryption with PBKDF2/Feistel network
+- Optional passphrase support
+- GF(256) for arithmetic (instead of large prime field)
 
 ## Requirements
 
@@ -37,251 +37,251 @@ SLIP-39 é um padrão para backup de wallets hierárquicas determinísticas (BIP
 **Priority: HIGH**
 
 #### FR-1.1: Generate 24-word BIP-39 Mnemonic
-- O secreon deve ser capaz de gerar uma seed phrase BIP-39 de 24 palavras
-- Entropia: 256 bits (32 bytes)
-- Wordlist: BIP-39 English (2048 palavras)
-- Formato: 24 palavras separadas por espaços
-- Checksum: 8 bits (SHA-256 dos primeiros 32 bytes)
+- Secreon must be able to generate a 24-word BIP-39 seed phrase
+- Entropy: 256 bits (32 bytes)
+- Wordlist: BIP-39 English (2048 words)
+- Format: 24 space-separated words
+- Checksum: 8 bits (SHA-256 of first 32 bytes)
 
 #### FR-1.2: BIP-39 to Master Secret Conversion
-- Converter BIP-39 mnemonic para master secret (entropy)
-- Master secret = primeiros 32 bytes da entropia original
-- Validar checksum da mnemonic BIP-39
-- Suportar importação de mnemonics existentes
+- Convert BIP-39 mnemonic to master secret (entropy)
+- Master secret = first 32 bytes of original entropy
+- Validate BIP-39 mnemonic checksum
+- Support import of existing mnemonics
 
-**Nota importante:** Para compatibilidade com wallets, o master secret usado em SLIP-39 deve ser o **BIP-32 master seed** (não o seed derivado via PBKDF2 do BIP-39).
+**Important note:** For wallet compatibility, the master secret used in SLIP-39 must be the **BIP-32 master seed** (not the seed derived via BIP-39 PBKDF2).
 
 ### FR-2: SLIP-39 Share Generation
 **Priority: HIGH**
 
 #### FR-2.1: Generate SLIP-39 Shares from Master Secret
-- Input: master secret (128-256 bits, múltiplo de 16 bits)
-- Output: conjunto de mnemonics SLIP-39
-- Suportar esquema de nível único (1 grupo) para casos simples
-- Suportar esquema de dois níveis (múltiplos grupos) para casos avançados
+- Input: master secret (128-256 bits, multiple of 16 bits)
+- Output: set of SLIP-39 mnemonics
+- Support single-level scheme (1 group) for simple cases
+- Support two-level scheme (multiple groups) for advanced cases
 
 #### FR-2.2: Single-Level Scheme (T-of-N)
-- Permitir criar shares com threshold T e total N
-- Validações:
+- Allow creating shares with threshold T and total N
+- Validations:
   - 1 ≤ T ≤ N ≤ 16
-  - Comprimento do master secret ≥ 128 bits e múltiplo de 16 bits
-- Implementação recomendada: 1 grupo com T1=T e N1=N
+  - Master secret length ≥ 128 bits and multiple of 16 bits
+- Recommended implementation: 1 group with T1=T and N1=N
 
 #### FR-2.3: Two-Level Scheme (GT-of-G with Ti-of-Ni)
-- Group threshold (GT): número de grupos necessários para recuperação
-- Por grupo i: member threshold (Ti) e member count (Ni)
-- Validações:
+- Group threshold (GT): number of groups needed for recovery
+- Per group i: member threshold (Ti) and member count (Ni)
+- Validations:
   - 1 ≤ GT ≤ G ≤ 16
-  - Para cada grupo: 1 ≤ Ti ≤ Ni ≤ 16
-  - Se Ti = 1, então Ni DEVE ser 1 (evitar 1-of-N com N > 1)
+  - For each group: 1 ≤ Ti ≤ Ni ≤ 16
+  - If Ti = 1, then Ni MUST be 1 (avoid 1-of-N with N > 1)
 
 #### FR-2.4: SLIP-39 Mnemonic Format
-- Cada share é codificado como mnemonic de 20-33 palavras
-- Estrutura (bits):
-  - Identifier (15): identificador aleatório comum a todas as shares
-  - Extendable flag (1): flag de backup extensível
-  - Iteration exponent (4): expoente para PBKDF2 (10000×2^e iterações)
-  - Group index (4): índice do grupo
+- Each share is encoded as 20-33 word mnemonic
+- Structure (bits):
+  - Identifier (15): random identifier common to all shares
+  - Extendable flag (1): extendable backup flag
+  - Iteration exponent (4): exponent for PBKDF2 (10000×2^e iterations)
+  - Group index (4): group index
   - Group threshold (4): GT-1
   - Group count (4): G-1
-  - Member index (4): índice do membro no grupo
+  - Member index (4): member index in group
   - Member threshold (4): Ti-1
-  - Share value (variável): valor do share com padding
+  - Share value (variable): share value with padding
   - Checksum (30): RS1024 checksum
-- Wordlist: SLIP-39 wordlist de 1024 palavras
-- Encoding: cada 10 bits = 1 palavra
+- Wordlist: SLIP-39 wordlist of 1024 words
+- Encoding: each 10 bits = 1 word
 
 ### FR-3: SLIP-39 Share Recovery
 **Priority: HIGH**
 
 #### FR-3.1: Recover Master Secret from SLIP-39 Mnemonics
-- Input: conjunto de mnemonics SLIP-39 + passphrase opcional
-- Output: master secret original
-- Validar todas as shares pertencem ao mesmo backup (mesmo identifier)
-- Validar número suficiente de grupos e membros
-- Verificar checksum de cada mnemonic
+- Input: set of SLIP-39 mnemonics + optional passphrase
+- Output: original master secret
+- Validate all shares belong to same backup (same identifier)
+- Validate sufficient number of groups and members
+- Verify checksum of each mnemonic
 
 #### FR-3.2: Incremental Share Collection
-- Permitir adicionar shares incrementalmente
-- Informar quantas shares/grupos ainda faltam
-- Detectar shares inválidas ou incompatíveis
+- Allow adding shares incrementally
+- Report how many shares/groups are still needed
+- Detect invalid or incompatible shares
 
 ### FR-4: Encryption and Security
 **Priority: HIGH**
 
 #### FR-4.1: Master Secret Encryption
-- Usar Feistel cipher de 4 rounds com PBKDF2 como função de round
-- PBKDF2 parâmetros:
+- Use 4-round Feistel cipher with PBKDF2 as round function
+- PBKDF2 parameters:
   - PRF: HMAC-SHA256
   - Password: (round_number || passphrase)
-  - Salt: ("shamir" || identifier) || R (quando ext=0) ou apenas R (quando ext=1)
-  - Iterations: 2500 × 2^e (onde e = iteration exponent)
-  - dkLen: n/2 bytes (metade do tamanho do master secret)
+  - Salt: ("shamir" || identifier) || R (when ext=0) or just R (when ext=1)
+  - Iterations: 2500 × 2^e (where e = iteration exponent)
+  - dkLen: n/2 bytes (half the master secret size)
 
 #### FR-4.2: Passphrase Support
-- Passphrase opcional (ASCII imprimível, caracteres 32-126)
-- Passphrase vazia por padrão
-- Não há verificação de passphrase correta (plausible deniability)
+- Optional passphrase (printable ASCII, characters 32-126)
+- Empty passphrase by default
+- No verification of correct passphrase (plausible deniability)
 
 #### FR-4.3: Digest Verification
-- Para threshold ≥ 2, incluir digest do shared secret
-- Digest = primeiros 4 bytes de HMAC-SHA256(key=R, msg=S)
-- Permite detectar shares maliciosas ou incorretas
+- For threshold ≥ 2, include shared secret digest
+- Digest = first 4 bytes of HMAC-SHA256(key=R, msg=S)
+- Allows detection of malicious or incorrect shares
 
 ### FR-5: GF(256) Arithmetic
 **Priority: HIGH**
 
 #### FR-5.1: Galois Field Operations
-- Implementar GF(256) usando representação polinomial
-- Polinômio irredutível: x^8 + x^4 + x^3 + x + 1 (Rijndael)
-- Operações: adição (XOR), multiplicação, divisão (inverso multiplicativo)
-- Pré-computar tabelas de log/exp para eficiência
+- Implement GF(256) using polynomial representation
+- Irreducible polynomial: x^8 + x^4 + x^3 + x + 1 (Rijndael)
+- Operations: addition (XOR), multiplication, division (multiplicative inverse)
+- Pre-compute log/exp tables for efficiency
 
 #### FR-5.2: Secret Splitting on GF(256)
-- Aplicar SSS byte-a-byte sobre o secret
-- Para cada byte, criar polinômio de grau (threshold-1)
-- Secret armazenado em x=255
-- Digest armazenado em x=254 (quando threshold ≥ 2)
+- Apply SSS byte-by-byte over the secret
+- For each byte, create polynomial of degree (threshold-1)
+- Secret stored at x=255
+- Digest stored at x=254 (when threshold ≥ 2)
 
 ### FR-6: Checksum and Validation
 **Priority: HIGH**
 
 #### FR-6.1: RS1024 Checksum
-- Implementar Reed-Solomon code sobre GF(1024)
-- Polinômio gerador: (x-a)(x-a²)(x-a³) onde a é raiz de x^10 + x^3 + 1
-- Comprimento: 3 palavras (30 bits)
+- Implement Reed-Solomon code over GF(1024)
+- Generator polynomial: (x-a)(x-a²)(x-a³) where a is root of x^10 + x^3 + 1
+- Length: 3 words (30 bits)
 - Customization strings:
-  - "shamir" quando ext=0
-  - "shamir_extendable" quando ext=1
+  - "shamir" when ext=0
+  - "shamir_extendable" when ext=1
 
 #### FR-6.2: Mnemonic Validation
-- Validar checksum de cada mnemonic
-- Validar comprimento mínimo (20 palavras)
-- Validar padding bits (devem ser zeros e ≤ 8 bits)
-- Validar consistência de parâmetros entre shares
+- Validate checksum of each mnemonic
+- Validate minimum length (20 words)
+- Validate padding bits (must be zeros and ≤ 8 bits)
+- Validate parameter consistency between shares
 
 ### FR-7: User Interface and CLI
 **Priority: MEDIUM**
 
 #### FR-7.1: Generate Command Extensions
 ```bash
-# Gerar BIP-39 seed (24 palavras)
+# Generate BIP-39 seed (24 words)
 secreon slip39 generate-seed --out seed.txt
 
-# Gerar SLIP-39 shares de uma BIP-39 seed
+# Generate SLIP-39 shares from BIP-39 seed
 secreon slip39 generate --seed-file seed.txt --threshold 3 --shares 5 --out shares/
 
-# Gerar SLIP-39 shares de um master secret hex
+# Generate SLIP-39 shares from hex master secret
 secreon slip39 generate --master-secret <hex> --threshold 3 --shares 5 --out shares/
 
-# Esquema avançado (2 grupos)
+# Advanced scheme (2 groups)
 secreon slip39 generate --master-secret <hex> \
   --group-threshold 2 \
   --group 2 3 \
   --group 3 5 \
   --out shares/
 
-# Com passphrase
+# With passphrase
 secreon slip39 generate --seed-file seed.txt --threshold 3 --shares 5 \
   --passphrase "my secure passphrase" --out shares/
 ```
 
 #### FR-7.2: Recover Command
 ```bash
-# Recuperar de mnemonics
+# Recover from mnemonics
 secreon slip39 recover --mnemonics mnemonic1.txt mnemonic2.txt mnemonic3.txt
 
-# Recuperar de diretório
+# Recover from directory
 secreon slip39 recover --shares-dir shares/ --passphrase "my secure passphrase"
 
-# Recuperar interativamente
+# Recover interactively
 secreon slip39 recover --interactive
 ```
 
 #### FR-7.3: Display Formats
-- Exibir shares como mnemonics (palavras)
-- Suportar exportação em JSON para compatibilidade
-- Exibir informações sobre shares (grupo, threshold, etc.)
-- Warnings claros sobre distribuição segura de shares
+- Display shares as mnemonics (words)
+- Support JSON export for compatibility
+- Display share information (group, threshold, etc.)
+- Clear warnings about secure share distribution
 
 ### FR-8: Compatibility and Interoperability
 **Priority: HIGH**
 
 #### FR-8.1: SLIP-39 Standard Compliance
-- Implementação 100% compatível com especificação SLIP-39
-- Passar todos os test vectors oficiais
-- Interoperável com Trezor, Ledger, e outras implementações
+- Implementation 100% compatible with SLIP-39 specification
+- Pass all official test vectors
+- Interoperable with Trezor, Ledger, and other implementations
 
 #### FR-8.2: Wordlist Management
-- Incluir SLIP-39 wordlist oficial
-- Suportar validação de palavras
-- Suporte a prefixos únicos de 4 letras
+- Include official SLIP-39 wordlist
+- Support word validation
+- Support unique 4-letter prefixes
 
 #### FR-8.3: BIP-39 Compatibility
-- Incluir BIP-39 wordlist (English)
-- Suportar conversão bidirecional entre BIP-39 e entropy
-- **Importante:** SLIP-39 e BIP-39 não são diretamente conversíveis
-  - SLIP-39 usa master seed (entropy)
-  - BIP-39 usa seed derivado via PBKDF2
+- Include BIP-39 wordlist (English)
+- Support bidirectional conversion between BIP-39 and entropy
+- **Important:** SLIP-39 and BIP-39 are not directly convertible
+  - SLIP-39 uses master seed (entropy)
+  - BIP-39 uses seed derived via PBKDF2
 
 ### FR-9: Testing and Quality
 **Priority: HIGH**
 
 #### FR-9.1: Unit Tests
-- Testes para todas as operações de GF(256)
-- Testes de criptografia/descriptografia
-- Testes de geração e recuperação de shares
-- Testes de validação e checksum
+- Tests for all GF(256) operations
+- Encryption/decryption tests
+- Share generation and recovery tests
+- Validation and checksum tests
 
 #### FR-9.2: Integration Tests
-- Test vectors oficiais do SLIP-39
-- Testes de interoperabilidade com python-shamir-mnemonic
-- Testes de casos extremos (threshold=1, shares máximos, etc.)
+- Official SLIP-39 test vectors
+- Interoperability tests with python-shamir-mnemonic
+- Edge case tests (threshold=1, maximum shares, etc.)
 
 #### FR-9.3: Property-Based Tests
-- Qualquer conjunto válido de T shares recupera o secret
-- Menos de T shares não vaza informação
-- Shares de grupos diferentes não funcionam sozinhas
+- Any valid set of T shares recovers the secret
+- Fewer than T shares doesn't leak information
+- Shares from different groups don't work alone
 
 ### FR-10: Documentation
 **Priority: MEDIUM**
 
 #### FR-10.1: User Documentation
-- Tutorial passo-a-passo para criar backup
-- Exemplos de casos de uso (pessoal, família, empresarial)
-- Best practices para distribuição de shares
-- Explicação de segurança e trade-offs
+- Step-by-step tutorial for creating backup
+- Use case examples (personal, family, business)
+- Best practices for share distribution
+- Security and trade-offs explanation
 
 #### FR-10.2: Technical Documentation
-- Documentação da arquitetura
+- Architecture documentation
 - API reference
-- Algoritmos e estruturas de dados
-- Diferenças entre SSS clássico e SLIP-39
+- Algorithms and data structures
+- Differences between classic SSS and SLIP-39
 
 ## Non-Functional Requirements
 
 ### NFR-1: Performance
-- Geração de shares: < 5 segundos para master secret de 256 bits
-- Recuperação de shares: < 10 segundos (devido ao PBKDF2)
-- Tempo dominado por PBKDF2 (10000+ iterações)
+- Share generation: < 5 seconds for 256-bit master secret
+- Share recovery: < 10 seconds (due to PBKDF2)
+- Time dominated by PBKDF2 (10000+ iterations)
 
 ### NFR-2: Security
-- Usar fonte criptograficamente segura de aleatoriedade (`secrets` module)
-- Nunca logar ou exibir master secret sem confirmação explícita
-- Warnings sobre distribuição segura de shares
-- Suporte a memory zeroing onde possível (Python limitation)
+- Use cryptographically secure randomness source (`secrets` module)
+- Never log or display master secret without explicit confirmation
+- Warnings about secure share distribution
+- Support memory zeroing where possible (Python limitation)
 
 ### NFR-3: Usability
-- Interface CLI clara e intuitiva
-- Mensagens de erro descritivas
-- Validação de entrada antes de operações custosas
-- Suporte a operações batch
+- Clear and intuitive CLI interface
+- Descriptive error messages
+- Input validation before expensive operations
+- Batch operation support
 
 ### NFR-4: Maintainability
-- Código modular e bem organizado
-- Type hints completos
-- Testes com boa cobertura (>80%)
-- Documentação inline
+- Modular and well-organized code
+- Complete type hints
+- Tests with good coverage (>80%)
+- Inline documentation
 
 ## Technical Architecture
 
@@ -314,39 +314,39 @@ secreon/
 ```
 
 ### Dependencies
-- **No external dependencies** para funcionalidade core (apenas stdlib)
-- Opcional: `click` para CLI avançada (já usado em python-shamir-mnemonic)
-- Para testes: `pytest`, `hypothesis` (property-based testing)
+- **No external dependencies** for core functionality (stdlib only)
+- Optional: `click` for advanced CLI (already used in python-shamir-mnemonic)
+- For tests: `pytest`, `hypothesis` (property-based testing)
 
 ## Migration and Compatibility
 
 ### Backward Compatibility
-- Secreon existente continua funcionando sem mudanças
-- SLIP-39 é adicionado como novo subcomando
-- Formato JSON de shares clássicas permanece inalterado
+- Existing secreon continues working without changes
+- SLIP-39 is added as new subcommand
+- JSON format of classic shares remains unchanged
 
 ### Forward Compatibility
-- Implementar ext=1 (extendable backup flag) por padrão
-- Suportar versões futuras do SLIP-39 via ext flag
+- Implement ext=1 (extendable backup flag) by default
+- Support future SLIP-39 versions via ext flag
 
 ## Risk Assessment
 
 ### High Risk Items
-1. **Complexidade da especificação SLIP-39**: muitos detalhes, fácil errar
-   - Mitigação: implementação incremental, test vectors, code review
+1. **SLIP-39 specification complexity**: many details, easy to make mistakes
+   - Mitigation: incremental implementation, test vectors, code review
 
-2. **Interoperabilidade**: incompatibilidade com outras implementações
-   - Mitigação: testes cruzados com python-shamir-mnemonic, Trezor
+2. **Interoperability**: incompatibility with other implementations
+   - Mitigation: cross-testing with python-shamir-mnemonic, Trezor
 
-3. **Segurança criptográfica**: bugs podem comprometer secrets
-   - Mitigação: auditoria de código, testes extensivos, usar implementação de referência como guia
+3. **Cryptographic security**: bugs can compromise secrets
+   - Mitigation: code audit, extensive testing, use reference implementation as guide
 
 ### Medium Risk Items
-1. **Performance de PBKDF2**: pode ser lento em hardware limitado
-   - Mitigação: permitir configuração de iteration exponent
+1. **PBKDF2 performance**: may be slow on limited hardware
+   - Mitigation: allow iteration exponent configuration
 
-2. **UX complexa**: esquema de dois níveis pode confundir usuários
-   - Mitigação: documentação clara, exemplos, modo simples por padrão
+2. **Complex UX**: two-level scheme may confuse users
+   - Mitigation: clear documentation, examples, simple mode by default
 
 ## Success Criteria
 
@@ -359,13 +359,13 @@ secreon/
 6. ✅ CLI funcional para operações básicas
 
 ### Full Feature Set
-1. ✅ Suporte a esquema de dois níveis (grupos)
-2. ✅ Suporte a passphrase
-3. ✅ Configuração de iteration exponent
+1. ✅ Two-level scheme support (groups)
+2. ✅ Passphrase support
+3. ✅ Iteration exponent configuration
 4. ✅ Extendable backup flag
-5. ✅ Interoperabilidade completa com outras implementações
-6. ✅ Documentação completa
-7. ✅ Cobertura de testes >80%
+5. ✅ Complete interoperability with other implementations
+6. ✅ Complete documentation
+7. ✅ Test coverage >80%
 
 ## References
 
@@ -391,12 +391,12 @@ secreon/
 ## Appendix A: Example Scenarios
 
 ### Scenario 1: Personal Backup (Simple)
-**Goal**: Proteger uma wallet pessoal com redundância
+**Goal**: Protect a personal wallet with redundancy
 
 **Setup**:
 - Generate 24-word BIP-39 seed
 - Create 3-of-5 SLIP-39 shares
-- Store: 1 em casa, 1 no trabalho, 1 cofre, 2 com amigos
+- Store: 1 at home, 1 at work, 1 in safe, 2 with friends
 
 **Commands**:
 ```bash
@@ -405,12 +405,12 @@ secreon slip39 generate --seed-file seed.txt --threshold 3 --shares 5 --out shar
 ```
 
 ### Scenario 2: Family Backup (Two-Level)
-**Goal**: Você pode recuperar sozinho OU sua família pode recuperar juntos
+**Goal**: You can recover alone OR your family can recover together
 
 **Setup**:
-- Group 1: 2-of-2 (seus shares pessoais)
-- Group 2: 3-of-5 (shares da família)
-- Group threshold: 1 (qualquer grupo completo)
+- Group 1: 2-of-2 (your personal shares)
+- Group 2: 3-of-5 (family shares)
+- Group threshold: 1 (any complete group)
 
 **Commands**:
 ```bash
@@ -422,13 +422,13 @@ secreon slip39 generate --seed-file seed.txt \
 ```
 
 ### Scenario 3: Corporate Backup (Advanced)
-**Goal**: Requer aprovação de múltiplos departamentos
+**Goal**: Require approval from multiple departments
 
 **Setup**:
-- Group 1: 2-of-3 (diretores)
-- Group 2: 3-of-5 (equipe técnica)
+- Group 1: 2-of-3 (directors)
+- Group 2: 3-of-5 (technical team)
 - Group 3: 2-of-3 (compliance)
-- Group threshold: 2 (dois departamentos devem concordar)
+- Group threshold: 2 (two departments must agree)
 
 **Commands**:
 ```bash
@@ -442,14 +442,14 @@ secreon slip39 generate --master-secret <hex> \
 
 ## Appendix B: Migration Path from Legacy SSS
 
-Para usuários existentes do secreon que usam SSS clássico:
+For existing secreon users using classic SSS:
 
-1. **Não há conversão direta**: SSS clássico e SLIP-39 são incompatíveis
-2. **Recomendação**: 
-   - Recuperar o secret original usando shares antigas
-   - Gerar novas shares SLIP-39 do secret
-   - Destruir shares antigas de forma segura
-3. **Coexistência**: ambos os sistemas podem coexistir no secreon
+1. **No direct conversion**: Classic SSS and SLIP-39 are incompatible
+2. **Recommendation**: 
+   - Recover original secret using old shares
+   - Generate new SLIP-39 shares from the secret
+   - Securely destroy old shares
+3. **Coexistence**: both systems can coexist in secreon
 
 ## Version History
 
@@ -459,5 +459,5 @@ Para usuários existentes do secreon que usam SSS clássico:
 
 ---
 **Document Status**: DRAFT
-**Última Atualização**: 2025-12-06
+**Last Update**: 2025-12-06
 
