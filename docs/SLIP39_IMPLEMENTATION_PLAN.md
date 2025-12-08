@@ -136,17 +136,18 @@ This document presents a detailed plan, divided into incremental steps, to imple
 5. Support salt customization (ext flag)
 
 **Deliverables**:
-- [ ] `cipher.py` with `encrypt()` and `decrypt()` functions
-- [ ] Round-trip tests (encrypt → decrypt = identity)
-- [ ] Tests with different iteration exponents
-- [ ] Tests with/without extendable flag
+- [x] `cipher.py` with `encrypt()` and `decrypt()` functions
+- [x] Round-trip tests (encrypt → decrypt = identity)
+- [x] Tests with different iteration exponents
+- [x] Tests with/without extendable flag
 
 **Acceptance Criteria**:
-- Encrypt/decrypt are perfect inverses
-- Compatible with python-shamir-mnemonic
-- Acceptable performance (~5-10s for e=1)
+- [x] Encrypt/decrypt are perfect inverses
+- [x] Compatible with python-shamir-mnemonic
+- [x] Acceptable performance (~5-10s for e=1)
 
 **Dependencies**: None (uses stdlib hashlib, hmac)
+**Status**: ✅ COMPLETE (2025-12-07)
 
 ---
 
@@ -166,17 +167,19 @@ This document presents a detailed plan, divided into incremental steps, to imple
 5. Implement validations
 
 **Deliverables**:
-- [ ] `share.py` with `Share` class
-- [ ] Methods `to_mnemonic()` and `from_mnemonic()`
-- [ ] Encoding/decoding round-trip tests
-- [ ] Validation of all fields
+- [x] `share.py` with `Share` class
+- [x] Methods `to_mnemonic()` and `from_mnemonic()`
+- [x] Encoding/decoding round-trip tests
+- [x] Validation of all fields
 
 **Acceptance Criteria**:
-- Share → mnemonic → Share preserves data
-- Checksum validated on decode
-- Format compatible with specification
+- [x] Share → mnemonic → Share preserves data
+- [x] Checksum validated on decode
+- [x] Format compatible with specification
 
 **Dependencies**: 1.2 (RS1024), 1.3 (Wordlist)
+**Status**: ✅ COMPLETE (2025-12-07)
+**Status**: ✅ COMPLETE (2025-12-07)
 
 ---
 
@@ -199,19 +202,20 @@ This document presents a detailed plan, divided into incremental steps, to imple
    - `recover_ems(grouped_shares)` → ems
 
 **Deliverables**:
-- [ ] `shamir.py` with split/recover functions
-- [ ] `EncryptedMasterSecret` class
-- [ ] Split/recover round-trip tests
-- [ ] Threshold tests (T shares work, T-1 fail)
-- [ ] Two-level scheme tests
+- [x] `shamir.py` with split/recover functions
+- [x] `EncryptedMasterSecret` class
+- [x] Split/recover round-trip tests
+- [x] Threshold tests (T shares work, T-1 fail)
+- [x] Two-level scheme tests
 
 **Acceptance Criteria**:
-- Any set of T shares recovers secret
-- T-1 shares do not recover secret
-- Digest detects invalid shares
-- Compatible with python-shamir-mnemonic
+- [x] Any set of T shares recovers secret
+- [x] T-1 shares do not recover secret
+- [x] Digest detects invalid shares
+- [x] Compatible with python-shamir-mnemonic
 
 **Dependencies**: 1.1 (GF256), 2.1 (Cipher), 2.2 (Share)
+**Status**: ✅ COMPLETE (2025-12-07)
 
 ---
 
