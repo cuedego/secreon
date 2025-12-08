@@ -200,7 +200,7 @@ class Share:
         
         share_data = self._encode_id_exp() + self._encode_share_params() + value_data
         checksum = rs1024.create_checksum(
-            share_data, _customization_string(self.extendable)
+            share_data, self.extendable
         )
         
         return wordlist.indices_to_words(share_data + checksum)
@@ -235,7 +235,7 @@ class Share:
         iteration_exponent = id_exp_int & ((1 << ITERATION_EXP_LENGTH_BITS) - 1)
         
         # Verify checksum
-        if not rs1024.verify_checksum(mnemonic_data, _customization_string(extendable)):
+        if not rs1024.verify_checksum(mnemonic_data, extendable):
             raise MnemonicError(
                 f'Invalid mnemonic checksum for "{" ".join(mnemonic.split()[:ID_EXP_LENGTH_WORDS + 2])} ...".'
             )
