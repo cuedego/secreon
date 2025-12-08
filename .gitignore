@@ -13,6 +13,7 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+.hypothesis/
 
 # Generated shares and secrets (DO NOT COMMIT)
 shares.json
