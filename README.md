@@ -1,19 +1,62 @@
 # Secreon
 
-Fault-tolerant secret storage using Shamir's Secret Sharing.
+Fault-tolerant secret storage using Shamir's Secret Sharing with full SLIP-39 support for cryptocurrency wallets.
 
 ## Overview
 
-Secreon implements Shamir's Secret Sharing scheme, allowing you to split a secret into multiple shares where any threshold number of shares can reconstruct the original secret. This provides fault tolerance and security for sensitive data.
+Secreon provides two complementary secret sharing implementations:
+
+1. **Classic SSS**: General-purpose Shamir's Secret Sharing for any secret
+2. **SLIP-39**: Cryptocurrency-focused implementation with BIP-39 compatibility and Trezor compatibility
 
 ## Features
 
-- **Generate shares** from a secret (string or file)
+### Classic SSS
+
+- **Generate shares** from any secret (string or file)
 - **Recover secret** from shares
-- **JSON format** for share storage (default)
-- **KDF support** for passphrases (SHA-256, PBKDF2)
+- **JSON format** for share storage
+- **KDF support** (SHA-256, PBKDF2)
 - **Configurable threshold** and share count
-- **Safe defaults** (secrets never stored in config)
+
+### SLIP-39 (Cryptocurrency Wallets)
+
+- **BIP-39 compatible** - works with standard wallet seeds
+- **Two-level secret sharing** - groups with member thresholds
+- **Passphrase encryption** - additional security layer
+- **Trezor compatible** - interoperable with Trezor hardware wallets
+- **Checksum validation** - RS1024 error detection
+- **Complete CLI** - generate, recover, validate, and inspect shares
+
+## Quick Start
+
+### SLIP-39 for Cryptocurrency Wallets
+
+```bash
+# Generate a new BIP-39 seed
+python3 secreon.py slip39 generate-seed --words 24
+
+# Split into SLIP-39 shares (3-of-5)
+python3 secreon.py slip39 generate \
+    --bip39 "your 24 word seed phrase here" \
+    --groups "3,5" \
+    --passphrase "YourPassword" \
+    --split-shares \
+    --out-dir ./shares
+
+# Recover secret from shares
+python3 secreon.py slip39 recover \
+    --shares share-1.json share-2.json share-3.json \
+    --passphrase "YourPassword"
+
+# Validate shares
+python3 secreon.py slip39 validate -f ./shares/*.json
+
+# Get share information
+python3 secreon.py slip39 info --file share-1.json
+```
+
+See [SLIP-39 CLI Documentation](docs/SLIP39_CLI.md) for complete details.
 
 ## Installation
 
@@ -23,19 +66,32 @@ No dependencies required beyond Python 3.6+. Clone and run:
 git clone https://github.com/cuedego/secreon.git
 cd secreon
 python3 secreon.py --help
-
-```
-
-Or use directly:
-
-```bash
-python3 src/sss.py --help
-
 ```
 
 ## Usage
 
-### Generate shares from a secret
+### SLIP-39 Commands
+
+See [SLIP-39 CLI Documentation](docs/SLIP39_CLI.md) for complete details.
+
+```bash
+# Generate BIP-39 seed
+python3 secreon.py slip39 generate-seed --words 24
+
+# Generate SLIP-39 shares
+python3 secreon.py slip39 generate --bip39 "..." --groups "3,5" --passphrase "..."
+
+# Recover secret
+python3 secreon.py slip39 recover --shares share1.json share2.json share3.json -p "..."
+
+# Validate shares
+python3 secreon.py slip39 validate -f share1.json share2.json
+
+# Display share info
+python3 secreon.py slip39 info "lizard lily acrobat..."
+```
+
+### Classic SSS Commands
 
 ```bash
 # Generate 5 shares with threshold of 3 from a string secret
