@@ -1,6 +1,6 @@
 # Secreon
 
-Fault-tolerant secret sharing using Shamir's Secret Sharing with full SLIP-39 support for cryptocurrency wallets. It´s a compact implementation built for those rare individuals who believe their 24-word seed deserves the same threat modeling as state secrets. No external dependencies, no magic, just deterministic cryptography and the quiet fear of irreversible loss.
+Fault-tolerant secret sharing scheme using Shamir's Secret Sharing with full SLIP-39 support for cryptocurrency wallets. It´s a compact implementation, built for those rare individuals who believe their 24-word seed deserves the same threat modeling as state secrets. No external dependencies, no magic, just deterministic cryptography and the quiet fear of irreversible loss.
 
 ## Overview
 
